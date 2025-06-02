@@ -56,7 +56,7 @@ source("_Setup.R")
 ## Samenvatting analyse kansengelijkheid
 {{< include R/qmd/equity-conclusions.qmd >}}
 
-Zie voor een verdere onderbouwing van deze uitkomsten de volgende hoofdstukken in de analyse.
+Zie voor een verdere onderbouwing van deze uitkomsten de volgende hoofdstukken.
 :::
 
 ::: {.content-visible when-profile="advanced-report"}

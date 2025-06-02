@@ -12,6 +12,9 @@
 # User-specific files
 .Ruserdata
 
+# Example code in package build process
+*-Ex.R
+
 # Output files from R CMD build
 /*.tar.gz
 
@@ -43,18 +46,32 @@ _freeze
 # Renv
 /renv/library/
 
+# Data files
+/data/*
+!/data/synthetic/
+!/data/reference/
+!/data/metadata/
+
 # Temporary or private folders
 /_advanced-report/
 /_basic-report/
-/_freeze/
 /_output/
 /_test/
 /_graveyard/
 /_log/
 /_tmpthuas
 
-# Hidden quarto folder
+# Quarto
+/_book/
+/_freeze/
+/_site/
 /.quarto/
+/*_files/
+/*_cache/
+*_cache
+*.pdf
+*.html
+*html*
 
 # Lintr folders and files
 /ins/

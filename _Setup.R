@@ -42,6 +42,34 @@ cli_h1("0. ON START")
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 0.1 Restore renv ####
 
+# Check that Quarto is installed
+if (requireNamespace("quarto", quietly = TRUE)) {
+  
+  # Determine minimal version of Quarto
+  quarto_version_minimal_number <- 16.39
+  quarto_version_minimal_string <- "1.6.39"
+  
+  # Get the version
+  quarto_version <- quarto::quarto_version()
+  
+  # Please verify that the version is 1.6.39 or higher.
+  if (as.numeric(sub("\\.", "", quarto_version)) >= quarto_version_minimal_number) {
+    cli_alert_success(glue("Quarto version is {quarto_version_minimal_string} or higher ({quarto_version})."))
+  } else {
+    cli_alert_danger(glue("Quarto version is {quarto_version}, but {quarto_version_minimal_string} or higher is required. \n",
+                     "Install the latest version of Quarto."))
+  }
+} else {
+  cli_alert_danger(glue("Quarto version is not installed. \n",
+                   "Install the latest version of Quarto; ",
+                   "at least version {quarto_version_minimal_string}."))
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 0.2 Restore renv ####
+
+cli_h1("Installing packages")
+
 if (!exists("renv_restored") || renv_restored == FALSE) {
   if (!renv::status()$synchronized) {
     renv::restore()
@@ -53,7 +81,7 @@ cli_h1("Installing packages")
 cli_alert_success("All packages are installed")
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 0.2 Load Setup config #### 
+# 0.3 Load Setup config #### 
 
 source("_Setup_config.R")
 
@@ -61,7 +89,7 @@ cli_h1("Load configuration")
 cli_alert_success("Configuration has been loaded.")
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 0.3 Set environment profile #### 
+# 0.4 Set environment profile #### 
 
 if (!is.null(rmarkdown::metadata$config$environment)) {
   environment <- rmarkdown::metadata$config$environment
@@ -73,14 +101,14 @@ cli_h1("Setting environment")
 cli_alert_success(glue("Environment is {col_red(environment)}"))
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 0.4 Determine the current file name ####
+# 0.5 Determine the current file name ####
 
 if (!exists("current_file")) {
   current_file <- "unknown"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 0.5 Reset Setup ####
+# 0.6 Reset Setup ####
 
 # Set this variable to T to reset this page or restart the session
 current_file <- FALSE
