@@ -1,4 +1,4 @@
----
+--- 
 subtitle: "Een analyse van kansengelijkheid in studiesucces ({{< meta params.model >}})"
 
 # Format and output

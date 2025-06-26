@@ -1,5 +1,4 @@
 ---
-title: "Prognosemodel {{< meta params.model >}}"
 subtitle: "Een analyse van kansengelijkheid in studiesucces ({{< meta params.model >}})"
 
 # Format and output

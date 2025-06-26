@@ -60,8 +60,3 @@ if (file.exists(here::here("_advanced-report", "ch-models.html"))) {
                          "for the study programme {execute_params_list$sp}."))
 }
 
-Hoi_Nando <- function()
-{
-  x = 1 + 1 
-  return(x)
-}

@@ -32,7 +32,7 @@ if (!exists("params")) {
   params$model                <- "Retentie na 1 jaar"
   params$pd                   <- "Nvt"
   params$use_synthetic_data   <- TRUE
-  params$recreate_plots        <- FALSE
+  params$recreate_plots       <- FALSE
   params$sp                   <- "CMD"
   params$sp_form              <- "VT"
   params$enrollment_selection <- FALSE

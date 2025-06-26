@@ -48,6 +48,9 @@ source("_Setup.R")
 
 <!-- HEADER -->
 
+<!-- subtitle: "Een analyse van kansengelijkheid in studiesucces ({{ params.model }})" -->
+
+
 <!-- Studyprogram short -->
 {{< include R/qmd/header-studyprogram.qmd >}}
 
