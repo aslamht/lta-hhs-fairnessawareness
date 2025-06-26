@@ -29,11 +29,13 @@ includes:
   copyright:      true
 ---
 
+<!-- Title -->
+
+# Prognosemodel
+
 ```{r setup}
 #| label: setup
 #| include: false
-
-prognose_titel <- paste("Prognosemodel", tolower(params$model)) ## Set the title
 
 # Current file
 current_file <- "ch4-models.qmd"
