@@ -1,8 +1,3 @@
----
-# No title for this page
-
----
-
 ### Ratio's om kansengelijkheid te beoordelen
 
 Voor elke groep onderzoeken we **5 ratio's**, ook wel maatstaven of metrieken genoemd. Deze ratio's zijn afgeleid van verhoudingen in de confusion matrix; ze geven inzicht in de mate van bias en kansengelijkheid vanuit verschillende perspectieven van een prognosemodel. 

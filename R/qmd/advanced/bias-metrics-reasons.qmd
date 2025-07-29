@@ -1,8 +1,3 @@
----
-# No title for this page
-
----
-
 Hiervoor is een aantal redenen:
 
 **1. Meerdere indicatoren**: Het gebruik van meerdere maatstaven zorgt ervoor dat we de detectie van bias niet baseren op slechts een, mogelijk ruisgevoelige, indicator. Als slechts één metriek buiten de marges valt, kan dit toeval zijn of te wijten zijn aan andere niet-systematische fouten in de data. We spreken dan nog niet over bias. Meerdere metrieke afwijkingen geven een sterkere indicatie van een systematisch probleem.
