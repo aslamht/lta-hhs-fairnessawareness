@@ -80,3 +80,6 @@ _freeze
 
 # Icon files
 Icon?
+
+# MacOS files
+.DS_Store
