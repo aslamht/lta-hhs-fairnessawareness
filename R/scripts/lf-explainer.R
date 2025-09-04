@@ -1,10 +1,12 @@
+library(DALEXtra)
+
 # Extract the fitted model
 fitted_model <- last_fit |>
-  extract_fit_parsnip()
+  tune::extract_fit_parsnip()
 
 # Extract the workflow
 workflow <- last_fit |>
-  extract_workflow()
+  tune::extract_workflow()
 
 # Create an explainer
 explain_lf <- DALEX::explain(model = workflow,

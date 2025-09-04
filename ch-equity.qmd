@@ -156,7 +156,7 @@ tbl_summary <- df_sp_enrollments |>
   modify_spanning_header(c("stat_1", "stat_2") ~ "**Retentie na 1 jaar**") |>
   bold_labels() |> 
   as_flex_table() |> 
-  flextable::border(border.top = fp_border(color = "grey")) |> 
+  flextable::border(border.top = officer::fp_border(color = "grey")) |> 
   set_table_properties(width = 0.8, layout = "autofit")
 
 

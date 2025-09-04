@@ -18,6 +18,9 @@
 # 2) ___
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+library(gtsummary)
+library(flextable)
+
 # . ####
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 1. STUDY PROGRAMME-SPECIFIC FUNCTIONS ####
@@ -1424,7 +1427,7 @@ get_obj_fairness <- function(explainer,
     pull() 
   
   # Create a fairness object
-  fairness_object <- fairness_check(
+  fairness_object <- fairmodels::fairness_check(
     explainer,
     protected = protected,
     privileged = privileged,
@@ -2454,7 +2457,7 @@ get_density_plot <- function(fairness_object, group) {
   # Create a density plot
   density_plot <- fairness_object |> 
     
-    plot_density() +
+    fairmodels::plot_density() +
     
     # Add title and subtitle
     labs(
