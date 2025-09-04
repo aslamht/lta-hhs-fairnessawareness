@@ -30,11 +30,13 @@ if (dir.exists("_freeze")) {
   unlink("_freeze", recursive = TRUE)
 }
 
-quarto::quarto_render(
+out <- quarto::quarto_render(
   input    = "ch-models-basic.qmd",
   execute_params = execute_params_list,
   as_job   = FALSE
 )
+unlink("temp.html")
+unlink("ch-models-basic_files", recursive = TRUE)
 
 withr::with_envvar(new = c("QUARTO_PROFILE" = "basic-report"), {
   quarto::quarto_render(execute_params = execute_params_list,

@@ -2,7 +2,7 @@
 subtitle: "Een analyse van kansengelijkheid in studiesucces ({{< meta params.model >}})"
 
 # Format and output
-output-file: "ch-models.html"
+output-file: "temp.html"
 
 # Parameters
 params:
