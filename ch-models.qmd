@@ -545,8 +545,8 @@ Voor de uitvoering bouwen we een workflow. Daaraan voegen we het model en de bew
 # Create the workflow: logistic regression
 lr_workflow <- 
   workflow() |>         # Create a workflow
-  workflows::add_model(lr_mod) |>  # Add the model
-  workflows::add_recipe(lr_recipe) # Add the recipe
+  add_model(lr_mod) |>  # Add the model
+  add_recipe(lr_recipe) # Add the recipe
 
 # Show workflow
 lr_workflow
