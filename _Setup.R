@@ -226,7 +226,7 @@ if (setup_executed == FALSE) {
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 1.7 Load additional features ####
 
-  source("R/functions/report.helpers.R")
+  source("R/functions/report.helpers.basic.R")
   
   cli_h1("Load functions")
   cli_alert_success("Functions are loaded: report")
