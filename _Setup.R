@@ -137,13 +137,13 @@ if (setup_executed == FALSE) {
   cli_h1("Load functions")
   cli_alert_success("Functions have been loaded: basis and fairness")
   
-  # # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  # # 1.3 Default datasets ####
-  # 
-  # cli_h1("Load standard datasets")
-  # 
-  # # Load the default datasets: df_studyprogrammes, df_sectors, df_studytypes, df_studyforms
-  # load_datasets(message = TRUE)
+  # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  # 1.3 Default datasets ####
+
+  cli_h1("Load standard datasets")
+
+  # Load the default datasets: df_studyprogrammes, df_sectors, df_studytypes, df_studyforms
+  load_datasets(message = TRUE)
   # 
   # # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # # 1.4 Load libraries ####
@@ -197,14 +197,20 @@ if (setup_executed == FALSE) {
   # 
   # library(cardx)        # for extra analysis results data utilities
   # 
-  # cli_h1("Load libraries")
-  # cli_alert_success("Libraries have been loaded.")
+  cli_h1("Load libraries")
+  cli_alert_success("Libraries have been loaded.")
+  
+  library(dplyr)
+  library(gtsummary)
+  library(ggplot2)
+  library(ggtext)
+  library(tidymodels)
   
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 1.5 Brand #### 
   
   # Load the brand settings
-  brand_data <- read_yaml("brand/_brand.yml")
+  brand_data <- yaml::read_yaml("brand/_brand.yml")
   
   cli_h1("Load brand setting")
   cli_alert_success("Brand settings have been loaded.")
