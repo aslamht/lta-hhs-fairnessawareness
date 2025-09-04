@@ -201,7 +201,6 @@ if (setup_executed == FALSE) {
   cli_alert_success("Libraries have been loaded.")
   
   library(dplyr)
-  library(gtsummary)
   library(ggplot2)
   library(ggtext)
   library(tidymodels)
