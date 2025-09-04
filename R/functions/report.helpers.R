@@ -344,8 +344,8 @@ get_tbl_data_dictionary <- function(df) {
     bg(i = ~ seq_len(nrow(df_data_dictionary)) %% 2 == 0, bg = "gray95") |>  
     align(align = "left", part = "all") |>  
     border_remove() |>  
-    border_inner_h(border = fp_border(color = "gray", width = 0.5)) |>  
-    border_inner_v(border = fp_border(color = "gray", width = 0.5)) |>  
+    border_inner_h(border = officer::fp_border(color = "gray", width = 0.5)) |>  
+    border_inner_v(border = officer::fp_border(color = "gray", width = 0.5)) |>  
     bold(part = "header") |>  
     fontsize(size = 11, part = "all") |>  
     color(part = "header", color = "black") |>  
@@ -609,9 +609,9 @@ mutate_levels <- function(df, vars, levels) {
   walk(seq_along(vars), function(i) {
     df <- df |>
       mutate(
-        !!rlang::sym(vars[i]) := fct_expand(!!rlang::sym(vars[i]), levels[[i]]),
-        !!rlang::sym(vars[i]) := fct_relevel(!!rlang::sym(vars[i]), levels[[i]]),
-        !!rlang::sym(vars[i]) := fct_drop(!!rlang::sym(vars[i]))
+        !!rlang::sym(vars[i]) := forcats::fct_expand(!!rlang::sym(vars[i]), levels[[i]]),
+        !!rlang::sym(vars[i]) := forcats::fct_relevel(!!rlang::sym(vars[i]), levels[[i]]),
+        !!rlang::sym(vars[i]) := forcats::fct_drop(!!rlang::sym(vars[i]))
       )
   })
   
@@ -701,7 +701,7 @@ get_tbl_summary <- function(df) {
     ) |>
     add_overall(last = TRUE, col_label = "**Totaal**, N = {N}") |>
     as_flex_table() |>
-    flextable::border(border.top = fp_border(color = "grey")) |>
+    flextable::border(border.top = officer::fp_border(color = "grey")) |>
     set_table_properties(width = 0.8, layout = "autofit")
   
   df_summary
@@ -1408,7 +1408,7 @@ get_df_shapley <- function(shapley_object) {
     ungroup() |>
     
     # Sort the variables by mean contribution
-    mutate(variable = fct_reorder(variable, abs(mean_val))) 
+    mutate(variable = forcats::fct_reorder(variable, abs(mean_val))) 
   
   df_shapley
   
