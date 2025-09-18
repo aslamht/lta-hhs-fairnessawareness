@@ -225,8 +225,11 @@ if (setup_executed == FALSE) {
   
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 1.7 Load additional features ####
-
-  source("R/functions/report.helpers.basic.R")
+  if(Sys.getenv("QUARTO_PROFILE", unset = NA) == "advanced-report") {
+    source("R/functions/report.helpers.R")
+  } else {
+    source("R/functions/report.helpers.basic.R")
+  }
   
   cli_h1("Load functions")
   cli_alert_success("Functions are loaded: report")
