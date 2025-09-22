@@ -278,7 +278,12 @@ if (setup_executed == FALSE) {
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 2.6 Enrollment data  ####
   
-  df_sp_enrollments <- get_sp_enrollments_base_syn()
+  df_sp_enrollments <- rio::import("R/data/syn/studyprogrammes_enrollments_syn.rds", trust = TRUE) |>
+    filter(INS_Faculteit == current_sp$INS_Faculteit,
+           INS_Opleidingsnaam_huidig == current_sp$INS_Opleidingsnaam_huidig,
+           INS_Opleiding == current_sp$INS_Opleiding,
+           INS_Opleidingsvorm == toupper(current_sp$INS_Opleidingsvorm)) |> 
+    mutate(LTA_Dataset = "ASI-Syn 20240124")
   
   cli_h1("Enrollments")
   cli_alert_success("Enrollments loaded")
