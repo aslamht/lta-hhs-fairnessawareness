@@ -22,8 +22,6 @@
  
 source("R/functions/fairness.dalex.helpers.R")
 
-library(purrr)
-
 # Function to display the outcomes of a fairness object
 print_fairness_object_lta <- function(x,
                                       ...,
