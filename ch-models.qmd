@@ -594,8 +594,8 @@ lr_plot <-
   # Define the title, subtitle and caption
   labs(
     caption = caption,
-    x = "Area under the ROC Curve",
-    y = "Penalty"
+    x = "Penalty",
+    y = "Area under the ROC Curve"
   )
   
 # Add theme elements
