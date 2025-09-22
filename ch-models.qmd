@@ -20,7 +20,7 @@ params:
 includes:
   inleiding:      true
   model_lr:       true
-  model_rf:       true
+  model_rf:       false
   model_svm:      false
   final_fit:      true
   conclusions:    true
