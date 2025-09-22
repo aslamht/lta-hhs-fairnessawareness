@@ -15,6 +15,10 @@ params:
   enrollment_selection: false
   sp: "CMD"
   sp_form: "VT"
+  
+# Content
+includes:
+  model_rf:       false
 ---
 
 <!-- Title -->
@@ -35,6 +39,8 @@ df_model_results <- data.frame(
   model = character(),
   auc = numeric()
 )
+
+include_model_rf <- rmarkdown::metadata$includes$model_rf    # Random Forest
 ```
 
 ```{r}
@@ -290,129 +296,106 @@ df_model_results <-
 
 <!-- MODEL II: Random Forest -->
 
+
+
 ```{r}
 #| label: cores
 
-# Determine the number of cores
-cores <- parallel::detectCores()
+if(include_model_rf == TRUE) {
 
-```
+  # Determine the number of cores
+  cores <- parallel::detectCores()
+  
+  # Build the model: random forest
+  
+  rf_mod <- 
+    rand_forest(mtry = tune(), min_n = tune(), trees = 1000) |> 
+    set_engine("ranger", num.threads = cores) |> 
+    set_mode("classification")
+  
+  # Create the recipe: random forest
+  rf_recipe <- 
+    recipe(Retentie ~ ., data = df_retention_train) |> 
+    step_unknown(Studiekeuzeprofiel, 
+                 new_level = "Onbekend skp") |>   # Add unknown skp
+    step_rm(ID, Collegejaar)                      # Remove ID and Collegejaar from the model
+  
+  # Create the workflow: random forest
+  rf_workflow <- 
+    workflow() |> 
+    add_model(rf_mod) |> 
+    add_recipe(rf_recipe)
+  
+  # Show the parameters that can be tuned
+  rf_mod
+  
+  # Extract the parameters being tuned
+  extract_parameter_set_dials(rf_mod)
+  
+  # Determine the seed
+  set.seed(2904)
+  
+  # Build the grid: random forest
+  rf_res <- 
+    rf_workflow |> 
+    tune_grid(df_retention_validation,
+              grid = 25,
+              control = control_grid(save_pred = TRUE),
+              metrics = metric_set(roc_auc))
+  
+  # Show the best models
+  rf_res |> 
+    show_best(metric = "roc_auc", n = 15) |> 
+    mutate(mean = round(mean, 6)) |>
+    knitr::kable(col.names = c("Mtry", 
+                               "Min. aantal", 
+                               "Metriek",
+                               "Estimator",
+                               "Gemiddelde",
+                               "Aantal",
+                               "SE",
+                               "Configuratie"))
+  
+  # Select the best model
+  rf_best <- 
+    rf_res |> 
+    select_best(metric = "roc_auc")
+  
+  # Determine the AUC/ROC curve
+  rf_auc <- 
+    rf_res |> 
+    collect_predictions(parameters = rf_best) |> 
+    roc_curve(Retentie, .pred_FALSE) |> 
+    mutate(model = "Random Forest")
+  
+  # Determine the AUC of the best model
+  rf_auc_highest   <-
+    rf_res |>
+    collect_predictions(parameters = rf_best) |> 
+    roc_auc(Retentie, .pred_FALSE)
+  
+  # Add model name and AUC to df_model_results
+  df_model_results <- 
+    df_model_results |>
+    add_row(model = "Random Forest", 
+            auc = rf_auc_highest$.estimate)
 
-```{r}
-#| label: rf-mod
-#| code-fold: false
-
-# Build the model: random forest
-
-rf_mod <- 
-  rand_forest(mtry = tune(), min_n = tune(), trees = 1000) |> 
-  set_engine("ranger", num.threads = cores) |> 
+  last_rf_mod <-
+  rand_forest(mtry = rf_best$mtry,
+              min_n = rf_best$min_n,
+              trees = 1000) |>
+  set_engine("ranger", num.threads = cores, importance = "impurity") |>
   set_mode("classification")
-```
-
-
-```{r}
-#| label: rf-recipe
-#| code-fold: false
-
-# Create the recipe: random forest
-rf_recipe <- 
-  recipe(Retentie ~ ., data = df_retention_train) |> 
-  step_unknown(Studiekeuzeprofiel, 
-               new_level = "Onbekend skp") |>   # Add unknown skp
-  step_rm(ID, Collegejaar)                      # Remove ID and Collegejaar from the model
-```
-
-```{r}
-#| label: rf-workflow
-#| code-fold: false
-
-# Create the workflow: random forest
-rf_workflow <- 
-  workflow() |> 
-  add_model(rf_mod) |> 
-  add_recipe(rf_recipe)
-
-```
-
-
-```{r}
-#| label: rf-tune
-#| code-fold: false
-
-# Show the parameters that can be tuned
-rf_mod
-
-# Extract the parameters being tuned
-extract_parameter_set_dials(rf_mod)
-
-# Determine the seed
-set.seed(2904)
-
-# Build the grid: random forest
-rf_res <- 
+  
+  last_rf_workflow <- 
   rf_workflow |> 
-  tune_grid(df_retention_validation,
-            grid = 25,
-            control = control_grid(save_pred = TRUE),
-            metrics = metric_set(roc_auc))
-```
-
-```{r}
-#| label: tbl-rf-results
-#| tbl-cap: "Model performance voor random forest"
-#| code-fold: false
-
-# Show the best models
-rf_res |> 
-  show_best(metric = "roc_auc", n = 15) |> 
-  mutate(mean = round(mean, 6)) |>
-  knitr::kable(col.names = c("Mtry", 
-                             "Min. aantal", 
-                             "Metriek",
-                             "Estimator",
-                             "Gemiddelde",
-                             "Aantal",
-                             "SE",
-                             "Configuratie"))
-
-```
-
-```{r}
-#| label: rf-best
-#| code-fold: false
-
-# Select the best model
-rf_best <- 
-  rf_res |> 
-  select_best(metric = "roc_auc")
-
-```
-
-
-```{r}
-#| label: fig-rf-auc
-#| fig-cap: "ROC curve voor random forest"
- 
-# Determine the AUC/ROC curve
-rf_auc <- 
-  rf_res |> 
-  collect_predictions(parameters = rf_best) |> 
-  roc_curve(Retentie, .pred_FALSE) |> 
-  mutate(model = "Random Forest")
-
-# Determine the AUC of the best model
-rf_auc_highest   <-
-  rf_res |>
-  collect_predictions(parameters = rf_best) |> 
-  roc_auc(Retentie, .pred_FALSE)
-
-# Add model name and AUC to df_model_results
-df_model_results <- 
-  df_model_results |>
-  add_row(model = "Random Forest", 
-          auc = rf_auc_highest$.estimate)
-
+  update_model(last_rf_mod)
+  
+  last_fit_rf <- 
+  last_rf_workflow |> 
+  last_fit(splits)
+  
+}
 ```
 
 <!-- Final Fit -->
@@ -445,13 +428,6 @@ last_lr_mod <-
   set_engine("glmnet") |>
   set_mode("classification")
 
-last_rf_mod <-
-  rand_forest(mtry = rf_best$mtry,
-              min_n = rf_best$min_n,
-              trees = 1000) |>
-  set_engine("ranger", num.threads = cores, importance = "impurity") |>
-  set_mode("classification")
-
 ```
 
 ```{r}
@@ -462,10 +438,6 @@ last_rf_mod <-
 last_lr_workflow <- 
   lr_workflow |> 
   update_model(last_lr_mod)
-
-last_rf_workflow <- 
-  rf_workflow |> 
-  update_model(last_rf_mod)
 
 ```
 
@@ -481,12 +453,12 @@ last_fit_lr <-
   last_lr_workflow |> 
   last_fit(splits)
 
-last_fit_rf <- 
-  last_rf_workflow |> 
-  last_fit(splits)
+last_fits <- list("Logistic Regression" = last_fit_lr) 
 
-last_fits <- list(last_fit_lr, last_fit_rf) |> 
-  set_names(c("Logistic Regression", "Random Forest"))
+if (include_model_rf == TRUE) {
+  last_fits["Random Forest"] <- last_fit_rf
+}
+
 
 # Determine which model is best
 if (best_model == "Logistic Regression") {
