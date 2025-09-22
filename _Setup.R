@@ -177,7 +177,7 @@ if (setup_executed == FALSE) {
   
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 1.7 Load additional features ####
-  if(Sys.getenv("QUARTO_PROFILE", unset = NA) == "advanced-report") {
+  if(Sys.getenv("QUARTO_PROFILE") == "advanced-report") {
     source("R/functions/report.helpers.R")
   } else {
     source("R/functions/report.helpers.basic.R")
