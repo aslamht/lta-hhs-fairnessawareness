@@ -11,19 +11,6 @@
 #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Set minimal libraries
-library(here)
-library(cli)
-library(rvest)
-library(stringr)
-library(glue)
-library(quarto)
-
-# Delete the _freeze folder (bug in Quarto)
-if (dir.exists("_freeze")) {
-  unlink("_freeze", recursive = TRUE)
-}
-
 invisible(withr::with_envvar(new = c("QUARTO_PROFILE" = "basic-report"), {
   quarto::quarto_render(input    = "ch-models.qmd",
                         execute_params = execute_params_list,
