@@ -21,6 +21,8 @@
 library(gtsummary)
 library(flextable)
 
+cfg <- config::get()
+
 # . ####
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 1. STUDY PROGRAMME-SPECIFIC FUNCTIONS ####
@@ -187,7 +189,7 @@ get_current_sp_output_dir <- function(current_sp,
   ) |> tolower()
   
   # If synthetic data is used, add -synth to the directory
-  if (params$use_synthetic_data == TRUE) {
+  if (cfg$model_settings$use_synthetic_data == TRUE) {
     faculty_sp_form <- paste0(faculty_sp_form, "-synth")
   }
   
@@ -626,7 +628,7 @@ mutate_levels <- function(df, vars, levels) {
 # Function to retrieve training name with or without synth
 get_sp_name_syn <- function(sp_name) {
   
-  if (params$use_synthetic_data == TRUE) {
+  if (cfg$model_settings$use_synthetic_data == TRUE) {
     sp_name <- paste(sp_name, "(Synth)")
   } else {
     sp_name <- sp_name
@@ -899,8 +901,8 @@ copy_reports <- function(remove_orgials = FALSE, debug = FALSE) {
 get_current_analysis <- function() {
   
   # Define the description of the analysis
-  .succes     <- janitor::make_clean_names(params$succes)
-  .propedeuse <- janitor::make_clean_names(params$pd)
+  .succes     <- janitor::make_clean_names(cfg$model_settings$succes)
+  .propedeuse <- janitor::make_clean_names(cfg$model_settings$pd)
   
   this_analysis <- paste(
     .succes,
