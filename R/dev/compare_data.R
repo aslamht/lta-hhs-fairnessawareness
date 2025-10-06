@@ -52,6 +52,8 @@ dfsyn <- rio::import("R/data/syn/studyprogrammes_enrollments_syn.rds", trust = T
 ## +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 df1cho_vak2 <- df1cho_vak |>
+  
+  ## Select relevant variables
   select(
     `Persoonsgebonden nummer`,
     `Afkorting vak`,
@@ -59,13 +61,21 @@ df1cho_vak2 <- df1cho_vak |>
     `Gemiddeld cijfer cijferlijst`,
     Diplomajaar
   ) |>
+  
+  ## Group by student, course and graduation year (pre-education)
   group_by(`Persoonsgebonden nummer`, `Afkorting vak`, Diplomajaar) |>
+  
+  ## Select only the most recent graduation year
   filter(Diplomajaar == max(Diplomajaar)) |>
+  
+  ## Select only the highest grades
   summarize(
     `Cijfer eerste centraal examen` = max(`Cijfer eerste centraal examen`, na.rm = TRUE),
     `Gemiddeld cijfer cijferlijst` = max(`Gemiddeld cijfer cijferlijst`, na.rm = TRUE),
   ) |>
   ungroup() |>
+  
+  ## Pivot wider such that we get courses in columns
   pivot_wider(names_from = `Afkorting vak`,
               values_from = c(`Cijfer eerste centraal examen`)) |>
   ## Only select relevant courses

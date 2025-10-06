@@ -139,72 +139,29 @@ if (setup_executed == FALSE) {
   
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 1.3 Default datasets ####
-  
+
   cli_h1("Load standard datasets")
-  
+
   # Load the default datasets: df_studyprogrammes, df_sectors, df_studytypes, df_studyforms
   load_datasets(message = TRUE)
-  
-  # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  # 1.4 Load libraries ####
-  
-  library(conflicted)   # to solve conflicts
-  library(rio)          # for reading files
-  library(doParallel)   # for parallel processing
-  library(fs)           # for file system functions
-  
-  library(gtsummary)    # for descriptive summary tables
-  library(flextable)    # for flextables
-  library(officer)      # for formatting in tables
-  library(gt)           # for tables
-  library(gtExtras)     # for sparklines
-  library(cli)          # for cli texts
-  library(yaml)         # for yaml files
-  
-  library(tidymodels)   # for machine learning
-  library(forcats)      # to edit factor variables
-  library(performance)  # for performance measurements on lr models
-  library(vip)          # for variable importance plots
-  library(probably)     # for probabilistic models
-  library(discrim)      # discriminant analysis
-  library(klaR)         # for classification and visualization
-  library(betacal)      # for beta calibration
-  library(DALEX)        # for explainable AI
-  library(DALEXtra)     # for explainable AI
-  library(lobstr)       # for measuring objects
-  library(butcher)      # for shrinking models
-  library(iBreakDown)   # for explaining models
-  library(ingredients)  # for feature importance
-  library(fairmodels)   # for fairness in models
-  library(ranger)       # for random forest
-  
-  library(ggtext)       # for creating formatting in titles
-  library(showtext)     # for setting fonts
-  library(ggplot2)      # for creating plots
-  library(ggpubr)       # for saving plots
-  library(grid)         # for saving plots
-  library(gridGraphics) # for saving plots
-  library(extrafont)    # for saving plots
-  library(sysfonts)     # for fonts
-  library(systemfonts)  # for fonts
-  library(janitor)      # for cleaning names
-  library(pins)         # for data sharing
-  
-  library(cvms)         # for confusion matrices
-  library(ggimage)      # for confusion matrices
-  library(rsvg)         # for confusion matrices
-  library(ggnewscale)   # for confusion matrices
-  
-  library(cardx)        # for extra analysis results data utilities
-  
+  # 
+  # # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  # # 1.4 Load libraries ####
   cli_h1("Load libraries")
+
+  
+  library(dplyr)
+  library(ggplot2)
+  library(ggtext)
+  library(tidymodels)
+  
   cli_alert_success("Libraries have been loaded.")
   
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 1.5 Brand #### 
   
   # Load the brand settings
-  brand_data <- read_yaml("brand/_brand.yml")
+  brand_data <- yaml::read_yaml("brand/_brand.yml")
   
   cli_h1("Load brand setting")
   cli_alert_success("Brand settings have been loaded.")
@@ -220,9 +177,8 @@ if (setup_executed == FALSE) {
   
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 1.7 Load additional features ####
-
   source("R/functions/report.helpers.R")
-  
+
   cli_h1("Load functions")
   cli_alert_success("Functions are loaded: report")
   
@@ -318,7 +274,12 @@ if (setup_executed == FALSE) {
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 2.6 Enrollment data  ####
   
-  df_sp_enrollments <- get_sp_enrollments_base_syn()
+  df_sp_enrollments <- rio::import("R/data/syn/studyprogrammes_enrollments_syn.rds", trust = TRUE) |>
+    filter(INS_Faculteit == current_sp$INS_Faculteit,
+           INS_Opleidingsnaam_huidig == current_sp$INS_Opleidingsnaam_huidig,
+           INS_Opleiding == current_sp$INS_Opleiding,
+           INS_Opleidingsvorm == toupper(current_sp$INS_Opleidingsvorm)) |> 
+    mutate(LTA_Dataset = "ASI-Syn 20240124")
   
   cli_h1("Enrollments")
   cli_alert_success("Enrollments loaded")

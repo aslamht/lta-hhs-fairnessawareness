@@ -20,7 +20,7 @@ params:
 includes:
   inleiding:      true
   model_lr:       true
-  model_rf:       true
+  model_rf:       false
   model_svm:      false
   final_fit:      true
   conclusions:    true
@@ -114,6 +114,11 @@ We laden een subset in van historische data specifiek voor:
 
 # Read the data for this study programme
 if (params$use_synthetic_data) {
+  
+  print(params$sp)
+  
+  print(params$sp_form)
+  
   df_sp_enrollments <- get_sp_enrollments_syn(sp = params$sp,
                                               sp_form = toupper(params$sp_form)) |> 
     mutate(
@@ -232,10 +237,10 @@ df_summary <- df_sp_enrollments |>
   select(-c(ID, Collegejaar)) |> 
   
   # Adjust the labels of Retention from True to Ja, and from False to Nee
-  mutate(Retentie = fct_recode(Retentie, "Nee" = "FALSE", "Ja" = "TRUE")) |>
+  mutate(Retentie = forcats::fct_recode(Retentie, "Nee" = "FALSE", "Ja" = "TRUE")) |>
   
   # Adjust the order of the labels of Retentie
-  mutate(Retentie = fct_relevel(Retentie, "Ja", "Nee")) |> 
+  mutate(Retentie = forcats::fct_relevel(Retentie, "Ja", "Nee")) |> 
   
   # Adjust Studiekeuzeprofiel: if NA, then unknown
   mutate(Studiekeuzeprofiel = coalesce(Studiekeuzeprofiel, "Onbekend")) |> 
@@ -306,7 +311,7 @@ df_sp_enrollments <- df_sp_enrollments |>
   
   # Fill in factors missing values with “Unknown”
   mutate(across(where(is.factor), ~ suppressWarnings(
-    fct_explicit_na(.x, na_level = "Onbekend")
+    forcats::fct_explicit_na(.x, na_level = "Onbekend")
   ))) |> 
   
   # Rearrange the columns so that Retentie is in front
@@ -594,8 +599,8 @@ lr_plot <-
   # Define the title, subtitle and caption
   labs(
     caption = caption,
-    x = "Area under the ROC Curve",
-    y = "Penalty"
+    x = "Penalty",
+    y = "Area under the ROC Curve"
   )
   
 # Add theme elements
@@ -989,7 +994,7 @@ best_model_text <- df_model_results |>
 
 # Rearrange the final text for a clear summary
 best_model_text <-
-  glue(
+  glue::glue(
     "Het beste model is het **{best_model}** model met een **AUC/ROC van {best_model_auc}**. ",
     "{best_model_text} We ronden de analyse verder af met het {best_model} model ",
     "op de validatieset."
@@ -1010,14 +1015,14 @@ best_model_text <-
 if (best_model == "Logistisch Regressie") {
   
   # Make the final model
-  final_model_text <- glue("We maken het finale model op basis van de beste parameters ",
+  final_model_text <- glue::glue("We maken het finale model op basis van de beste parameters ",
                            "die we hebben gevonden. Voor het Logistisch Regressie model ",
                            "is dit het model met de beste penalty en mixture.")
 
 } else if (best_model == "Random Forest") {
   
   # Make the final model
-  final_model_text <- glue("We maken het finale model op basis van de beste parameters ",
+  final_model_text <- glue::glue("We maken het finale model op basis van de beste parameters ",
                            "die we hebben gevonden. Door in de engine bij `importance` ",
                            "de `impurity` op te geven, wordt het beste random forest model ",
                            "gekozen om de data definitief mee te classificeren.")
@@ -1347,14 +1352,14 @@ We passen de confusion matrix nu toe op het model dat als beste naar voren kwam.
 #| label: fig-confusion-matrix-actual
 #| fig-cap: !expr 'paste("Confusion matrix ten opzichte van", params$succes)'
  
-confusion_plot <- plot_confusion_matrix(df_confusion_matrix,
+confusion_plot <- cvms::plot_confusion_matrix(df_confusion_matrix,
                                         target_col = "Werkelijkheid",
                                         prediction_col = "Prediction",
                                         counts_col = "n",
                                         palette = "Blues",
                                         add_sums = TRUE,
                                         theme_fn = ggplot2::theme_light,
-                                        sums_settings = sum_tile_settings(
+                                        sums_settings = cvms::sum_tile_settings(
                                           palette = "Greens",
                                           label = "Totaal",
                                           tc_tile_border_color = "black"

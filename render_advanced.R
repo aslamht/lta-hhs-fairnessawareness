@@ -11,18 +11,10 @@
 #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Set minimal libraries
-library(quarto)
-library(here)
-
-# Define the parameters for the quarto file
-execute_params_list <- list(
-  sp       = "CMD", # CMD or VD
-  sp_form  = "VT"
-)
-
+invisible(
 # Render an advanced report
 withr::with_envvar(new = c("QUARTO_PROFILE" = "advanced-report"), {
   quarto::quarto_render(execute_params = execute_params_list,
                         as_job = FALSE)
 })
+)
