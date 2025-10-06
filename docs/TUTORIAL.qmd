@@ -181,13 +181,13 @@ It also contains the following **folders** (alphabetically):
     NEWS)
 -   `R/data` with general data sets
 -   `R/functions` with .R files for different types of functions
--   `R/images` with images from the reports
+-   `metadata/images` with images from the reports
 -   `R/qmd` with .qmd files that are embedded (text snippets)
 -   `R/scripts` with .R files to be embedded:
     -   `fitted-model.R`: a snippet for the fitted-model chunk
     -   `lf-explainer.R`: a snippet for the lf-explainer chunk
     -   `load-dfpersona.R`: a snippet for the load-dfpersona chunk
--   `R/vars` with the data dictonary of the variables
+-   `metadata/vars` with the data dictonary of the variables
 -   `renv` for the packages from the R environment
 
 **Git ignore**

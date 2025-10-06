@@ -1,32 +1,13 @@
 ---
-subtitle: "Een analyse van kansengelijkheid in studiesucces ({{< meta params.model >}})"
+subtitle: "Een analyse van kansengelijkheid in studiesucces (Retentie na 1 jaar)"
 
 # Format and output
 output-file: "ch-models.html"
 
 # Parameters
 params:
-  versie: "1.0"
-  succes: "Retentie na 1 jaar"
-  model: "Retentie na 1 jaar"
-  pd: "Nvt"
-  use_synthetic_data: true
-  recreate_plots: false
-  enrollment_selection: false
   sp: "CMD"
   sp_form: "VT"
-  
-# Content
-includes:
-  inleiding:      true
-  model_lr:       true
-  model_rf:       false
-  model_svm:      false
-  final_fit:      true
-  conclusions:    true
-  contact:        true
-  justification:  true
-  copyright:      true
 ---
 
 <!-- Title -->
@@ -40,19 +21,14 @@ includes:
 # Current file
 current_file <- "ch4-models.qmd"
 
-# Include the _Setup.R file
-source("_Setup.R") 
-
-include_model_lr     <- rmarkdown::metadata$includes$model_lr    # Penalized Logistic Regression
-include_model_rf     <- rmarkdown::metadata$includes$model_rf    # Random Forest
-include_model_svm    <- rmarkdown::metadata$includes$model_svm   # Support Vector Machine
-include_final_fit    <- rmarkdown::metadata$includes$final_fit   # Final Fit
-include_conclusions  <- rmarkdown::metadata$includes$conclusions # Conclusies
+cfg <- config::get()
 
 df_model_results <- data.frame(
   model = character(),
   auc = numeric()
 )
+
+source("R/functions/report.helpers.R")
 ```
 
 <!-- HEADER -->
@@ -402,7 +378,7 @@ We ontwikkelen in de verdere analyse eerst een aantal modellen en testen de pres
 #| label: fig-dataset-split
 #| fig-cap: "Splitsing van de dataset in trainingset, validatieset en testset"
 #| out-width: 80%
-knitr::include_graphics(here::here("R/images", "prognosemodel-dataset-lta-hhs.png"))
+knitr::include_graphics(here::here("metadata/images", "prognosemodel-dataset-lta-hhs.png"))
 ```
 
 
@@ -1299,7 +1275,7 @@ Een prognosemodel moet minimaal beter presteren dan een *advanced-report* om waa
 #| fig-cap: "Lift afhankelijk van advanced-report en accuraatheid"
 #| out-width: 80%
 
-knitr::include_graphics(here::here("R/images", "basemodel-lift.png"))
+knitr::include_graphics(here::here("metadata/images", "basemodel-lift.png"))
 
 ```
 
@@ -1342,7 +1318,7 @@ De prestaties van het model kunnen we verder uitdrukken in een *confusion matrix
 #| label: fig-confusion-matrix-explanation
 #| fig-cap: "Confusion matrix in relatie tot BSA"
 
-knitr::include_graphics(here::here("R/images", "confusion-matrix-retention-lta-hhs.png"))
+knitr::include_graphics(here::here("metadata/images", "confusion-matrix-retention-lta-hhs.png"))
 
 ```
 
@@ -1420,7 +1396,7 @@ rm(
 )
 
 # Logistic regression
-if (include_model_lr) {
+if (cfg$includes$model_lr) {
   rm(
     lr_auc,
     lr_auc_highest,
@@ -1438,7 +1414,7 @@ if (include_model_lr) {
 }
 
 # Random Forest
-if (include_model_rf) {
+if (cfg$includes$model_rf) {
   rm(
     rf_auc,
     rf_auc_highest,
@@ -1457,14 +1433,14 @@ if (include_model_rf) {
 }
 
 # Final Fit
-if (include_final_fit) {
+if (cfg$includes$final_fit) {Ï
   rm(
     last_fit
   )
 }
 
 # Conclusions
-if (include_conclusions) {
+if (cfg$includes$conclusions) {
   rm(
     top_models,
     df_top_vi,

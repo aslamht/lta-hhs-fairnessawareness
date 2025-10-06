@@ -328,7 +328,7 @@ get_breakdown_plotpath <- function(student_group,
 # Function to read the data dictionary.
 get_data_dictionary <- function() {
   
-  input_path <- "R/vars"
+  input_path <- "metadata/vars"
   
   df <- rio::import(file.path(input_path, "data-dictionary.xlsx"))
   

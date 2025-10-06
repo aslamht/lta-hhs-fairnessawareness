@@ -1,32 +1,9 @@
 --- 
-subtitle: "Een analyse van kansengelijkheid in studiesucces ({{< meta params.model >}})"
+subtitle: "Een analyse van kansengelijkheid in studiesucces (Retentie na 1 jaar)"
 
 # Format and output
 output-file: "ch-introduction.html"
 
-# Parameters
-params:
-  versie: "1.0"
-  succes: "Retentie na 1 jaar"
-  model: "Retentie na 1 jaar"
-  pd: "Nvt"
-  use_synthetic_data: true
-  recreate_plots: false
-  enrollment_selection: false
-  sp: "CMD"
-  sp_form: "VT"
-  
-# Content
-includes:
-  inleiding:      true
-  model_lr:       true
-  model_rf:       true
-  model_svm:      false
-  final_fit:      true
-  conclusions:    true
-  contact:        true
-  justification:  true
-  copyright:      true
 ---
 
 <!-- Title -->

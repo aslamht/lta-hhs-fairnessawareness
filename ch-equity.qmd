@@ -1,32 +1,9 @@
 ---
-subtitle: "Een analyse van kansengelijkheid in studiesucces ({{< meta params.model >}})"
+subtitle: "Een analyse van kansengelijkheid in studiesucces (Retentie na 1 jaar)"
 
 # Format and output
 output-file: "ch-equity.html"
 
-# Parameters
-params:
-  versie: "1.0"
-  succes: "Retentie na 1 jaar"
-  model: "Retentie na 1 jaar"
-  pd: "Nvt"
-  use_synthetic_data: true
-  recreate_plots: false
-  enrollment_selection: false
-  sp: "CMD"
-  sp_form: "VT"
-  
-# Content
-includes:
-  inleiding:      true
-  model_lr:       true
-  model_rf:       true
-  model_svm:      false
-  final_fit:      true
-  conclusions:    true
-  contact:        true
-  justification:  true
-  copyright:      true
 ---
 
 <!-- Title -->
@@ -80,7 +57,7 @@ We laden de bewerkte data en het beste prognosemodel in voor:
 ```{r}
 #| label: load-dfpersona
 #| eval: true
-#| file: R/scripts/load-dfpersona.R
+#| file: scripts/load-dfpersona.R
 ```
 
 ### Maak een explainer
@@ -93,14 +70,14 @@ DALEX is onder andere ontwikkeld om uit te kunnen leggen welke verklarende varia
 ```{r}
 #| label: fitted-model
 #| eval: true
-#| file: R/scripts/fitted-model.R
+#| file: scripts/fitted-model.R
 ```
 
 <!-- Include the last fit explainer -->
 ```{r}
 #| label: lf-explainer
 #| eval: true
-#| file: R/scripts/lf-explainer.R
+#| file: scripts/lf-explainer.R
 ```
 
 :::

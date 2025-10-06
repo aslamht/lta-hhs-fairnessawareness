@@ -13,8 +13,8 @@
 #
 # Datasets: None
 #
-# Remarks:
-# 1) None.
+# Remarks
+# 1) None
 # 2) ___
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -81,14 +81,6 @@ if (!exists("renv_restored") || renv_restored == FALSE) {
 
 cli_h1("Installing packages")
 cli_alert_success("All packages are installed")
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# 0.3 Load Setup config #### 
-
-source("_Setup_config.R")
-
-cli_h1("Load configuration")
-cli_alert_success("Configuration has been loaded.")
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 0.4 Set environment profile #### 
