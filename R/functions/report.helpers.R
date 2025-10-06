@@ -18,8 +18,10 @@
 # 2) ___
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+library(dplyr)
 library(gtsummary)
 library(flextable)
+library(glue)
 
 source("brand/colors/colors.R")
 
@@ -29,13 +31,6 @@ cfg <- config::get()
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 1. STUDY PROGRAMME-SPECIFIC FUNCTIONS ####
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-get_subtitle <- function() {
-  
-  subtitle <- format(Sys.Date(), "%d-%m-%Y")
-  
-  subtitle
-}
 
 # Function to determine current study programme
 get_current_sp <- function(sp, sp_form) {
@@ -131,7 +126,7 @@ show_current_sp_vars <- function() {
 }
 
 # Function to determine the current training name
-get_sp <- function() {
+get_sp <- function(current_sp) {
   
   if (!exists("current_sp")) {
     cli::cli_abort("current_sp is not defined")
@@ -498,14 +493,6 @@ mutate_grade_preeducation <- function(df) {
     )
   
   df
-  
-}
-
-# Function to get the variables
-get_df_variables <- function() {
-  
-  df_variables <- rio::import(file.path("R/data", "variables.xlsx"), sheet = "Variables")
-  df_variables
   
 }
 
@@ -929,7 +916,7 @@ knit_header <- function(x, rep = 1) {
 # Function to knit a line
 knit_print_rule <- function(x) {
   
-  knitr::knit_print(glue("\n\n\n{x}\n\n"))
+  knitr::knit_print(glue::glue("\n\n\n{x}\n\n"))
   
 }
 
@@ -1162,145 +1149,6 @@ get_df_persona <- function(group = NULL) {
   }
   
   df_persona
-}
-
-get_df_persona_recursive <- function(variable_list = NULL) {
-  
-  # Initialize the result dataframe
-  df_results <- NULL
-  
-  # Initialize the working dataframe
-  df_working <- df_sp_enrollments
-  
-  # Calculate the total number of students
-  total <- df_working |> count() |> pull(n)
-  
-  # Define categorical and numerical variables present in the dataframe
-  list_select_categorical <- c(
-    sensitive_labels,
-    "Studiekeuzeprofiel",
-    "APCG",
-    "Cijfer_CE_VO_missing",
-    "Cijfer_SE_VO_missing",
-    "Cijfer_CE_Nederlands_missing",
-    "Cijfer_CE_Engels_missing",
-    "Cijfer_CE_Wiskunde_missing",
-    "Cijfer_CE_Natuurkunde_missing",
-    "Dubbele_studie"
-  ) |> 
-    intersect(colnames(df_working))
-  
-  list_select_numerical <- c(
-    "Leeftijd",
-    "Aanmelding",
-    "Reistijd",
-    "Cijfer_CE_VO",
-    "Cijfer_SE_VO",
-    "Cijfer_CE_Nederlands",
-    "Cijfer_CE_Wiskunde",
-    "Cijfer_CE_Engels",
-    "Cijfer_CE_Natuurkunde",
-    "SES_Totaal",
-    "SES_Welvaart",
-    "SES_Arbeid"
-  ) |> 
-    intersect(colnames(df_working))
-  
-  # Add "Rangnummer" if the study programme is HDT
-  if (current_sp$INS_Opleiding == "HDT") {
-    list_select_numerical <- c(list_select_numerical, "Rangnummer") |> 
-      intersect(colnames(df_working))
-  }
-  
-  if (is.null(variable_list)) {
-    # If no variable list is provided, calculate for the entire dataset
-    df_results <- df_working |>
-      summarise(
-        # Categorical variables
-        across(
-          all_of(list_select_categorical), 
-          get_most_common_category,
-          .names = "{col}"
-        ),
-        # Numerical variables
-        across(
-          all_of(list_select_numerical),
-          get_median_rounded,
-          .names = "{col}"
-        ),
-        # Other variables
-        Collegejaar = median(Collegejaar, na.rm = TRUE),
-        ID = NA,
-        Subtotaal = n(),
-        .groups = "drop"
-      ) |>
-      mutate(
-        Totaal = total,
-        Percentage = round(Subtotaal / Totaal, 3),
-        Groep = "Alle",
-        Categorie = "Alle studenten"
-      ) |>
-      mutate(Leeftijd = as.integer(round(Leeftijd, 0))) |>
-      select(Groep, Categorie, Totaal, Subtotaal, Percentage, everything())
-    
-  } else {
-    
-    # Loop through each variable in the list
-    for (variable in variable_list) {
-      
-      # Convert variable to symbol for dynamic grouping
-      .variable <- as.name(variable)
-      
-      # Exclude the grouping variable from the categorical variables
-      list_select_categorical <- setdiff(list_select_categorical, variable)
-      
-      # Check if the current variable exists in the dataframe
-      if (!(variable %in% colnames(df_working))) {
-        warning(paste("Variable", variable, "not found in the dataset. Skipping."))
-        next
-      }
-      
-      # Summarise data for the current variable
-      df_persona <- df_working |>
-        group_by(!!.variable) |>
-        summarise(
-          # Categorical variables
-          across(
-            all_of(list_select_categorical), 
-            get_most_common_category,
-            .names = "{col}"
-          ),
-          # Numerical variables
-          across(
-            all_of(list_select_numerical),
-            get_median_rounded,
-            .names = "{col}"
-          ),
-          # Other variables
-          Collegejaar = median(Collegejaar, na.rm = TRUE),
-          ID = NA,
-          Subtotaal = n(),
-          .groups = "drop"
-        ) |>
-        mutate(
-          Totaal = total,
-          Percentage = round(Subtotaal / Totaal, 3),
-          Groep = variable,
-          Categorie = !!.variable
-        ) |>
-        mutate(Leeftijd = as.integer(round(Leeftijd, 0))) |>
-        select(Groep, Categorie, Totaal, Subtotaal, Percentage, everything())
-      
-      # Append to the result dataframe
-      df_results <- bind_rows(df_results, df_persona)
-      
-      # Update the working dataframe for the next iteration
-      df_working <- df_working |> 
-        filter(!!.variable == get_most_common_category(df_working[[variable]]))
-    }
-  }
-  
-  df_results
 }
 
 # Function to create a breakdown plot
@@ -1735,7 +1583,7 @@ get_fairness_conclusions <- function(df, variabele, succes = "Retentie na 1 jaar
 }
 
 # Function to create a data frame from the fairness check data
-get_df_fairness_check_data <- function(fairness_object, group) {
+get_df_fairness_check_data <- function(fairness_object, group, current_sp) {
   df <- fairness_object |>
     dplyr::mutate(
       Fair_TF = ifelse(score < 0.8 | score > 1.25, FALSE, TRUE),
@@ -1771,10 +1619,10 @@ get_df_fairness_check_data <- function(fairness_object, group) {
   df <- df |>
     left_join(df_counts, by = c("FRN_Group" = "name", "FRN_Subgroup" = "value")) |>
     replace_na(list(N = 0)) |> 
-    mutate(FRN_Faculteit = faculty,
-           FRN_Opleiding = sp,
-           FRN_Opleidingstype = sp_type,
-           FRN_Opleidingsvorm = sp_form) 
+    mutate(FRN_Faculteit = current_sp$INS_Faculteit,
+           FRN_Opleiding = current_sp$INS_Opleiding,
+           FRN_Opleidingstype = current_sp$INS_Opleidingstype_LTA,
+           FRN_Opleidingsvorm = tolower(current_sp$INS_Opleidingsvorm)) 
     
   df
 }
@@ -1924,13 +1772,13 @@ set_xy_axis <- function(axis, breaks = 4) {
 }
 
 # Function to define the caption
-get_caption <- function() {
+get_caption <- function(current_sp) {
   
   caption <- paste0(
     paste(
       cfg$research_settings$dataset,
       cfg$research_settings$research_path,
-      cfg$model_settings$sp,
+      get_sp(current_sp),
       sep = ", "
     ),
     ". \U00A9 ",
@@ -2032,7 +1880,9 @@ get_confusion_plot <- function(df_confusion_matrix) {
 }
 
 # Function to create an RMSE plot
-get_rmse_plot <- function(mp_rmse) {
+get_rmse_plot <- function(mp_rmse, current_sp) {
+  
+  caption <- get_caption(current_sp)
   
   # Create an RMSE plot
   mp_rmse_plot <- plot(mp_rmse) +
@@ -2448,7 +2298,9 @@ get_partial_dependence_plot <- function(pdp_lf,
 }
 
 # Function to create a density plot
-get_density_plot <- function(fairness_object, group) {
+get_density_plot <- function(fairness_object, group, current_sp) {
+  
+  caption <- get_caption(current_sp)
   
   # Determine the x axis
   x_axis_list <- set_xy_axis(axis = "x")
@@ -2468,7 +2320,7 @@ get_density_plot <- function(fairness_object, group) {
     # Add title and subtitle
     labs(
       title = glue(
-        "Verdeling en dichtheid van {tolower(research_settings[['succes_label']])}"
+        "Verdeling en dichtheid van {tolower(cfg$research_settings$succes_label)}"
       ),
       subtitle = glue("Naar **{group}**"),
       caption = caption,
@@ -2612,8 +2464,8 @@ save_plot <- function(plot_grid, width, height, save_filepath) {
 finalize_plot <- function(plot_name,
                           source_name,
                           save_filepath = file.path(Sys.getenv("TMPDIR"), "tmp-nc.png"),
-                          width_pixels = plot_width,
-                          height_pixels = plot_height,
+                          width_pixels = cfg$plot$plot_width,
+                          height_pixels = cfg$plot$plot_height,
                           show_plot = FALSE) {
   # Print de plot
   plot_grid <- ggpubr::ggarrange(

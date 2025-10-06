@@ -19,11 +19,12 @@ params:
 #| echo: false
 #| include: false
 
-# Current file
-current_file <- "ch3-factors.qmd"
+library(ggplot2)
+library(dplyr)
 
-## Include the _Setup.R file
-source("_Setup.R")
+source("R/functions/report.helpers.R")
+
+current_sp <- get_current_sp(cfg$model_settings$sp, cfg$model_settings$sp_form)
 
 ```
 
@@ -141,7 +142,7 @@ if (!file.exists(plot_path) || params$recreate_plots == TRUE) {
     filter(variable != "ID")
   
   # Create a plot of the RMSE
-  mp_rmse_plot <- get_rmse_plot(mp_rmse)
+  mp_rmse_plot <- get_rmse_plot(mp_rmse, current_sp)
   
   # Save the plot
   suppressWarnings(finalize_plot(
@@ -186,6 +187,7 @@ We onderzoeken zo de voorspelling van het model per groep en de bijdrage van de 
 #| echo: false
 #| results: asis
 
+df_persona_all <- 
 # Create a breakdown of the most common student across all dates
 breakdown_lf_all <- predict_parts(explainer = explain_lf,
                                   new_observation = df_persona_all[1, ],
@@ -680,6 +682,9 @@ for (group in c("Alle studenten", sensitive_labels)) {
 ```{r}
 #| label: cleanup
 #| echo: false
+
+
+rm(list = ls())
 
 # Collect garbage
 invisible(gc())

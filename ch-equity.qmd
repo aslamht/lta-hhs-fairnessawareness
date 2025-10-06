@@ -14,11 +14,25 @@ output-file: "ch-equity.html"
 #| label: setup
 #| echo: false
 
-# Current file
-current_file <- "ch2-equity.qmd"
+library(ggplot2)
+library(tidyr)
 
-# Include the _Setup.R file
-source("_Setup.R")
+cfg <- config::get()
+source("R/functions/report.helpers.R")
+
+current_sp <- get_current_sp(cfg$model_settings$sp, cfg$model_settings$sp_form)
+
+df_levels <- get_df_levels()
+levels <- get_levels(df_levels)
+df_variables <- rio::import(file.path("R/data", "variables.xlsx"), sheet = "Variables")
+sensitive_formal_variables <- get_list_sensitive(df_variables, var = "VAR_Formal_variable")
+sensitive_variables        <- get_list_sensitive(df_variables, var = "VAR_Simple_variable")
+sensitive_labels           <- get_list_sensitive(df_variables, var = "VAR_Variable_label")
+
+data_outputpath <- get_model_outputpath(mode = "data", current_sp)
+df_sp_enrollments <- rio::import(data_outputpath, trust = TRUE) |>
+  mutate(across(all_of(names(levels)), ~ factor(.x, levels = levels[[cur_column()]]))) |>
+  mutate(Retentie = as.numeric(Retentie) - 1)
 
 ```
 
@@ -57,7 +71,11 @@ We laden de bewerkte data en het beste prognosemodel in voor:
 ```{r}
 #| label: load-dfpersona
 #| eval: true
-#| file: scripts/load-dfpersona.R
+
+source("scripts/load-dfpersona.R")
+
+df_persona_all <- load_dfpersona(df_sp_enrollments, sensitive_labels)
+
 ```
 
 ### Maak een explainer
@@ -181,7 +199,7 @@ for (group in c(sensitive_labels)) {
   ) 
 
   # Save the plot
-  plot_name <- glue("density_plot_{tolower(group)}")
+  plot_name <- glue::glue("density_plot_{tolower(group)}")
   plot_path <- get_plot_outputpath(plot_name, mode = "plot", 
                                    best_model = best_model)
 
@@ -192,7 +210,7 @@ for (group in c(sensitive_labels)) {
   ))
 
   # Show the existing plot
-  plot <- glue("![Verdeling en dichtheid van {tolower(research_settings[['succes_label']])} ",
+  plot <- glue::glue("![Verdeling en dichtheid van {tolower(cfg$research_settings$succes_label)} ",
                "naar {tolower(group)}]({plot_path})",
                "{{#fig-fairness-check-{tolower(group)}}",
                "}")
@@ -231,6 +249,8 @@ Om de robuustheid en betrouwbaarheid in de detectie van bias te waarborgen, moet
 ```{r}
 #| label: bias-analysis
 #| results: asis
+
+source("R/functions/fairness.helpers.R")
 
 # Make a fairness analysis
 for (group in c(sensitive_labels)) {
@@ -276,9 +296,9 @@ for (group in c(sensitive_labels)) {
   knit_print_rule(plot)
   
   # Keep the fairness check data
-  fairness_output_path  <- get_model_outputpath(mode = "fairness", group = group)
+  fairness_output_path  <- get_model_outputpath(mode = "fairness", current_sp = current_sp, group = group)
   df_fairness_check_data <- get_df_fairness_check_data(fairness_object[["fairness_check_data"]],
-                                                       group = group)
+                                                       group = group, current_sp)
   saveRDS(df_fairness_check_data, file = fairness_output_path)
   
 }
@@ -312,7 +332,7 @@ for (group in c(sensitive_labels)) {
 #| echo: false
 
 # Datasets
-
+rm(list = ls())
 
 # Collect garbage
 invisible(gc())

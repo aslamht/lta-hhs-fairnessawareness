@@ -32,3 +32,6 @@ default:
     justification:  true
     copyright:      true
     
+  plot:
+    plot_width: 640
+    plot_height: 550

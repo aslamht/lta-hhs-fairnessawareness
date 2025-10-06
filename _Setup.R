@@ -313,8 +313,6 @@ if (setup_executed == FALSE) {
   # 2.8.2 Plot height and width ####
   
   # Determine the height and width of images
-  plot_width  <- 640
-  plot_height <- 550
   
   cli_h1("Plot settings")
   cli_alert_success("Plot caption, width and height set")
@@ -339,7 +337,7 @@ if (setup_executed == FALSE) {
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 3.2 Variables and levels ####
   
-  df_variables   <- get_df_variables()
+  df_variables   <- rio::import(file.path("R/data", "variables.xlsx"), sheet = "Variables")
   df_levels      <- get_df_levels()
   levels         <- get_levels(df_levels)
   levels_formal  <- get_levels(df_levels, formal = TRUE)

@@ -34,7 +34,9 @@ df_model_results <- data.frame(
   auc = numeric()
 )
 
-caption <- get_caption()
+current_sp <- get_current_sp(cfg$model_settings$sp, cfg$model_settings$sp_form)
+caption <- get_caption(current_sp)
+
 
 ```
 
@@ -1400,70 +1402,7 @@ Ongeacht de mate van accuraatheid, is het voor onderzoek naar kansengelijkheid e
 #| label: cleanup
 #| echo: false
 
-# Datasets
-rm(
-  df_sp_enrollments,
-  df_summary,
-  df_retention_test,
-  df_retention_train,
-  df_retention_validation,
-  splits
-)
-
-# Logistic regression
-if (cfg$includes$model_lr) {
-  rm(
-    lr_auc,
-    lr_auc_highest,
-    lr_best,
-    lr_mod,
-    lr_plot,
-    lr_recipe,
-    lr_res,
-    lr_workflow
-  )
-  # if (best_model == "lr") {
-  #   rm(last_lr_mod,
-  #      last_lr_workflow)
-  # }
-}
-
-# Random Forest
-if (cfg$includes$model_rf) {
-  rm(
-    rf_auc,
-    rf_auc_highest,
-    rf_best,
-    rf_mod,
-    rf_recipe,
-    rf_res,
-    rf_workflow,
-    last_rf_mod,
-    last_rf_workflow
-  )
-  # if (best_model == "rf") {
-  #   rm(last_rf_mod,
-  #      last_rf_workflow)
-  # }
-}
-
-# Final Fit
-if (cfg$includes$final_fit) {
-  rm(
-    last_fit
-  )
-}
-
-# Conclusions
-if (cfg$includes$conclusions) {
-  rm(
-    top_models,
-    df_top_vi,
-    top3_vi_list,
-    top45_vi_list
-  )
-}
-
+rm(list = ls())
 # Collect garbage
 invisible(gc())
 ```

@@ -15,11 +15,6 @@ output-file: "ch-introduction.html"
 #| echo: false
 #| include: false
 
-# Current file
-current_file <- "ch1-introduction.qmd"
-
-# Include the _Setup.R file
-source("_Setup.R")
 
 ```
 
