@@ -114,6 +114,11 @@ We laden een subset in van historische data specifiek voor:
 
 # Read the data for this study programme
 if (params$use_synthetic_data) {
+  
+  print(params$sp)
+  
+  print(params$sp_form)
+  
   df_sp_enrollments <- get_sp_enrollments_syn(sp = params$sp,
                                               sp_form = toupper(params$sp_form)) |> 
     mutate(

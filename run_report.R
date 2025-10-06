@@ -45,9 +45,15 @@ ui <- fluidPage(
       class = "center-box",
       h2("No Fairness without Awareness"),
       
-      selectInput("report_type", "Report type", c("basic", "advanced")),
-      selectInput("sp", "SP", c("CMD", "VD")),
-      selectInput("sp_form", "SP_FORM", c("VT", "ST", "XT")),
+      selectInput("report_type", "Report type", c("Basic", "Advanced")),
+      selectInput("sp", "Studyprogram", c("CMD", "VD")),
+      selectInput("sp_form", "Studyprogram Form", c("VT")),
+      fileInput("cho_file", "Upload 1CHO data",
+                accept = c(".csv", ".xlsx", ".xls", ".txt")),
+      fileInput("seswoa_file", "Upload SESWOA data",
+                accept = c(".csv", ".xlsx", ".xls", ".txt")),
+      fileInput("apcg_file", "Upload APCG data",
+                accept = c(".csv", ".xlsx", ".xls", ".txt")),
       
       actionButton("go", "Generate report", class = "btn btn-primary"),
       br(),
@@ -74,10 +80,14 @@ server <- function(input, output, session) {
     withProgress(message = "Rendering report...", value = 0, {
       incProgress(0.1)
       
+      # include uploaded file path if provided
+      cho_path <- if (!is.null(input$cho_file)) input$cho_file$datapath else NULL
+      
+      # include 
       execute_params_list <<- list(sp = input$sp, sp_form = input$sp_form)
       incProgress(0.4)
       
-      if (input$report_type == "basic") {
+      if (input$report_type == "Basic") {
         source("render_basic.R")
         out_dir  <- "_basic-report"
       } else {

@@ -25,12 +25,12 @@ if (dir.exists("_freeze")) {
 }
 
 invisible(withr::with_envvar(new = c("QUARTO_PROFILE" = "basic-report"), {
-  #quarto::quarto_render(input    = "ch-models.qmd",
-  #                      execute_params = execute_params_list,
-  #                      as_job   = FALSE)
- # quarto::quarto_render(input = "ch-equity.qmd",
- #                       execute_params = execute_params_list,
- #                       as_job = FALSE)
+  quarto::quarto_render(input    = "ch-models.qmd",
+                        execute_params = execute_params_list,
+                        as_job   = FALSE)
+  quarto::quarto_render(input = "ch-equity.qmd",
+                        execute_params = execute_params_list,
+                        as_job = FALSE)
   
   quarto::quarto_render(execute_params = execute_params_list, as_job = FALSE)
 }))
