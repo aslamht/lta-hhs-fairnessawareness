@@ -17,9 +17,16 @@ params:
 ```{r setup}
 #| label: setup
 #| include: false
-
+source("R/functions/report.helpers.R")
 # Current file
 current_file <- "ch4-models.qmd"
+
+library(dplyr)
+library(purrr)
+library(parsnip)
+library(recipes)
+library(workflows)
+library(ggplot2)
 
 cfg <- config::get()
 
@@ -28,7 +35,7 @@ df_model_results <- data.frame(
   auc = numeric()
 )
 
-source("R/functions/report.helpers.R")
+caption <- get_caption()
 ```
 
 <!-- HEADER -->
@@ -52,7 +59,7 @@ De basis voor deze analyse is studiedata van De Haagse Hogeschool (De HHs), verr
 2.  *Vooropleidingskenmerken*: toelaatgevende vooropleiding, studiekeuzeprofiel en gemiddeld eindcijfer in de vooropleiding.
 3.  *Aanmeldingskenmerken*: aansluiting (direct na diploma, tussenjaar, switch), dag van aanmelding, aantal parallelle studies aan De HHs en collegejaar.
 
-De variabelen die we hebben geselecteerd voor analyse is op basis van standaardgegevens van een popoluatie (leeftijd en geslacht), eerdere analsyes op voorspelkracht voor `r tolower(params$succes)` [@Bakker.2022], of omdat een kenmerk volgens Europese normen geldt als een sensitief kenmerk voor discriminatie [@handboek.2018].
+De variabelen die we hebben geselecteerd voor analyse is op basis van standaardgegevens van een popoluatie (leeftijd en geslacht), eerdere analsyes op voorspelkracht voor `r tolower(cfg$model_settings$succes)` [@Bakker.2022], of omdat een kenmerk volgens Europese normen geldt als een sensitief kenmerk voor discriminatie [@handboek.2018].
 
 ```{r}
 #| label: tbl-data-dictionary
@@ -83,13 +90,18 @@ We toetsen in deze analyse *`r succes_model_text`*, voortaan **Retentie** genoem
 
 We laden een subset in van historische data specifiek voor:
 
-**Opleiding**: `r current_sp$INS_Faculteit` \| `r get_sp_name_syn(current_sp$INS_Opleidingsnaam_huidig)` (`r current_sp$INS_Opleiding`), `r current_sp$INS_Opleidingsvorm`, eerstejaars - **`r succes_model`**
+**Opleiding**: `r current_sp$INS_Faculteit` \| `r get_sp_name_syn(current_sp$INS_Opleidingsnaam_huidig)` (`r current_sp$INS_Opleiding`), `r current_sp$INS_Opleidingsvorm`, eerstejaars - **`r cfg$model_settings$succes `**
 
 ```{r}
 #| label: load-data
 
+df_variables   <- get_df_variables()
+df_levels      <- get_df_levels()
+levels_formal  <- get_levels(df_levels, formal = TRUE)
+sensitive_formal_variables <- get_list_sensitive(df_variables, var = "VAR_Formal_variable")
+  
 # Read the data for this study programme
-if (params$use_synthetic_data) {
+if (cfg$model_settings$use_synthetic_data) {
   
   print(params$sp)
   
@@ -125,7 +137,7 @@ df_sp_enrollments <- df_sp_enrollments |>
                          levels = levels_formal[[cur_column()]]))) |> 
 
   # Create a simple success variable
-  mutate_retention(succes_model) |>
+  mutate_retention(cfg$model_settings$succes) |>
   
   # Convert the success variable into a factor
   mutate(SUC_Retentie = as.factor(SUC_Retentie)) |> 
@@ -149,7 +161,7 @@ for (i in sensitive_formal_variables){
 }
   
 # B Huidtherapie: Filter on only students with a grade number (selection)
-if (sp == "HDT") {
+if (cfg$model_settings$sp == "HDT") {
   df_sp_enrollments <- df_sp_enrollments |> 
     filter(!is.na(RNK_Rangnummer)) 
 } 
@@ -166,7 +178,7 @@ We selecteren eerst de relevante variabelen. We verwijderen daarbij variabelen d
 list_select <- get_list_select(df_variables, "VAR_Formal_variable")
 
 # B Huidtherapie: add the variable RNK_Rangnummer unless it is HDT
-if (sp == "HDT") {
+if (cfg$model_settings$sp == "HDT") {
   list_select <- c(list_select, "RNK_Rangnummer")
 }
 
@@ -195,7 +207,8 @@ df_sp_enrollments <- df_sp_enrollments |>
   arrange(Collegejaar, ID)
 
 df_sp_enrollments <- df_sp_enrollments |> 
-  sort_distinct()
+  distinct() |>
+  select(sort(names(df_sp_enrollments)))
 
 ```
 
@@ -388,17 +401,17 @@ knitr::include_graphics(here::here("metadata/images", "prognosemodel-dataset-lta
 set.seed(0821)
 
 # Split the data into 3 parts: 60%, 20% and 20%
-splits      <- initial_validation_split(df_sp_enrollments,
+splits      <- rsample::initial_validation_split(df_sp_enrollments,
                                         strata = Retentie,
                                         prop = c(0.6, 0.2))
 
 # Create three sets: a training set, a test set and a validation set
-df_retention_train      <- training(splits)
-df_retention_test       <- testing(splits)
-df_retention_validation <- validation_set(splits)
+df_retention_train      <- rsample::training(splits)
+df_retention_test       <- rsample::testing(splits)
+df_retention_validation <- rsample::validation_set(splits)
 
 # Create a resample set based on 10 folds (default)
-df_retention_resamples  <- vfold_cv(df_retention_train, strata = Retentie)
+df_retention_resamples  <- rsample::vfold_cv(df_retention_train, strata = Retentie)
 ```
 
 ```{r}
@@ -445,8 +458,8 @@ Eerst bouwen we het model.
 
 # Build the model: logistic regression
 lr_mod <- 
-  logistic_reg(penalty = tune(), mixture = 1) |> 
-  set_engine("glmnet")
+  parsnip::logistic_reg(penalty = tune(), mixture = 1) |> 
+  parsnip::set_engine("glmnet")
 ```
 
 ### Maak de recipe
@@ -466,14 +479,14 @@ Vervolgens zetten we meerdere stappen in een 'recipe':
 
 # Build the recipe: logistic regression
 lr_recipe <- 
-  recipe(Retentie ~ ., data = df_retention_train) |>  
-  update_role(ID, new_role = "ID") |>           # Set the student ID as an ID variable
-  step_rm(ID, Collegejaar) |>                   # Remove ID and college year from the model
-  step_unknown(Studiekeuzeprofiel, 
+  recipes::recipe(Retentie ~ ., data = df_retention_train) |>  
+  recipes::update_role(ID, new_role = "ID") |>           # Set the student ID as an ID variable
+  recipes::step_rm(ID, Collegejaar) |>                   # Remove ID and college year from the model
+  recipes::step_unknown(Studiekeuzeprofiel, 
                new_level = "Onbekend skp") |>   # Add unknown skp
-  step_dummy(all_nominal_predictors()) |>       # Create dummy variables from categorical variables
-  step_zv(all_predictors()) |>                  # Remove zero values
-  step_normalize(all_numeric_predictors())      # Center and scale numeric variables
+  recipes::step_dummy(all_nominal_predictors()) |>       # Create dummy variables from categorical variables
+  recipes::step_zv(all_predictors()) |>                  # Remove zero values
+  recipes::step_normalize(all_numeric_predictors())      # Center and scale numeric variables
 
 ```
 
@@ -482,7 +495,7 @@ lr_recipe <-
 #| tbl-cap: "Recipesteps voor logistische regressie"
 
 # Show the recipe
-tidy(lr_recipe) |> 
+broom::tidy(lr_recipe) |> 
   knitr::kable(col.names = c("Nummer", 
                              "Operatie", 
                              "Type",
@@ -500,8 +513,8 @@ De variabelen die nu nog overblijven zijn:
 
 # Show the variables remaining
 model_vars <- lr_recipe |> 
-  prep() |> 
-  juice() |> 
+  recipes::prep() |> 
+  recipes::juice() |> 
   names()
 
 # Add empty values to make the length divisible by 3
@@ -547,10 +560,10 @@ lr_reg_grid <- tibble(penalty = 10 ^ seq(-4, -1, length.out = 30))
 # Train and tune the model: logistic regression
 lr_res <- 
   lr_workflow |> 
-  tune_grid(df_retention_validation,
+  tune::tune_grid(df_retention_validation,
             grid = lr_reg_grid,
-            control = control_grid(save_pred = TRUE),
-            metrics = metric_set(roc_auc))
+            control = tune::control_grid(save_pred = TRUE),
+            metrics = yardstick::metric_set(yardstick::roc_auc))
 
 ```
 
@@ -561,7 +574,7 @@ lr_res <-
 # Plot the results + a red vertical line for the max AUC
 lr_plot <- 
   lr_res |> 
-  collect_metrics() |> 
+  probably::collect_metrics() |> 
   ggplot(aes(x = penalty, y = mean)) + 
   geom_point() + 
   geom_line() + 
@@ -584,7 +597,7 @@ lr_plot <- add_theme_elements(lr_plot, title_subtitle = FALSE)
   
 # Find the penalty value with the max AUC
 max_auc_penalty <- lr_res |> 
-  collect_metrics() |> 
+  tune::collect_metrics() |> 
   filter(mean == max(mean)) |> 
   pull(penalty)
 
@@ -594,7 +607,7 @@ lr_plot_plus <- lr_plot +
 
 # Find a mean for the max AUC that is higher
 max_auc_mean <- lr_res |> 
-  collect_metrics() |> 
+  tune::collect_metrics() |> 
   filter(mean == max(mean)) |> 
   pull(penalty)
 
@@ -616,7 +629,7 @@ We gebruiken modellen met een zo hoog mogelijke Area under the ROC Curve (AUC/RO
 # Show the best model
 top_models <-
   lr_res |> 
-  show_best(metric = "roc_auc", n = 10) |> 
+  tune::show_best(metric = "roc_auc", n = 10) |> 
   mutate(mean = round(mean, 6)) |>
   arrange(penalty) 
 ```
@@ -643,7 +656,7 @@ top_models |>
 # Select the best model: logistic regression
 lr_best <- 
   lr_res |> 
-  collect_metrics() |> 
+  tune::collect_metrics() |> 
   filter(mean == max(mean)) |>
   slice(1) 
 ```
@@ -671,8 +684,8 @@ lr_best |>
 # Collect the predictions and evaluate the model (AUC/ROC): logistic regression
 lr_auc <- 
   lr_res |> 
-  collect_predictions(parameters = lr_best) |> 
-  roc_curve(Retentie, .pred_FALSE) |> 
+  tune::collect_predictions(parameters = lr_best) |> 
+  yardstick::roc_curve(Retentie, .pred_FALSE) |> 
   mutate(model = "Logistisch Regressie")
 ```
 ```{r}
@@ -689,8 +702,8 @@ get_roc_plot(lr_auc, position = 1)
 # Determine the AUC of the best model
 lr_auc_highest   <-
   lr_res |>
-  collect_predictions(parameters = lr_best) |> 
-  roc_auc(Retentie, .pred_FALSE)
+  tune::collect_predictions(parameters = lr_best) |> 
+  yardstick::roc_auc(Retentie, .pred_FALSE)
 
 # Add model name and AUC df_model_results
 df_model_results <- 
@@ -804,10 +817,10 @@ set.seed(2904)
 # Build the grid: random forest
 rf_res <- 
   rf_workflow |> 
-  tune_grid(df_retention_validation,
+  tune::tune_grid(df_retention_validation,
             grid = 25,
-            control = control_grid(save_pred = TRUE),
-            metrics = metric_set(roc_auc))
+            control = tune::control_grid(save_pred = TRUE),
+            metrics = yardstick::metric_set(yardstick::roc_auc))
 ```
 
 ### Kies het beste model
@@ -821,7 +834,7 @@ We evalueren de beste modellen en maken een ROC curve om de performance van het 
 
 # Show the best models
 rf_res |> 
-  show_best(metric = "roc_auc", n = 15) |> 
+  tune::show_best(metric = "roc_auc", n = 15) |> 
   mutate(mean = round(mean, 6)) |>
   knitr::kable(col.names = c("Mtry", 
                              "Min. aantal", 
@@ -859,7 +872,7 @@ print(autoplot)
 # Select the best model
 rf_best <- 
   rf_res |> 
-  select_best(metric = "roc_auc")
+  tune::select_best(metric = "roc_auc")
 
 ```
 
@@ -880,7 +893,7 @@ rf_best |>
 
 # Collect the predictions
 rf_res |> 
-  collect_predictions() |> 
+  tune::collect_predictions() |> 
   head(10) |>
   mutate(.pred_FALSE = scales::percent(.pred_FALSE, accuracy = 0.1),
          .pred_TRUE = scales::percent(.pred_TRUE, accuracy = 0.1)) |>
@@ -901,8 +914,8 @@ rf_res |>
 # Determine the AUC/ROC curve
 rf_auc <- 
   rf_res |> 
-  collect_predictions(parameters = rf_best) |> 
-  roc_curve(Retentie, .pred_FALSE) |> 
+  tune::collect_predictions(parameters = rf_best) |> 
+  yardstick::roc_curve(Retentie, .pred_FALSE) |> 
   mutate(model = "Random Forest")
 
 # Plot the ROC curve
@@ -911,8 +924,8 @@ get_roc_plot(rf_auc, position = 2)
 # Determine the AUC of the best model
 rf_auc_highest   <-
   rf_res |>
-  collect_predictions(parameters = rf_best) |> 
-  roc_auc(Retentie, .pred_FALSE)
+  tune::collect_predictions(parameters = rf_best) |> 
+  yardstick::roc_auc(Retentie, .pred_FALSE)
 
 # Add model name and AUC to df_model_results
 df_model_results <- 
@@ -965,7 +978,7 @@ best_model_auc <- round(df_model_results$auc[df_model_results$best == TRUE], 4)
 # Build the text for the best models
 best_model_text <- df_model_results |> 
   filter(best == FALSE) |> 
-  glue_data("Het {model} model heeft een AUC van {round(auc, 4)}. ") |> 
+  glue::glue_data("Het {model} model heeft een AUC van {round(auc, 4)}. ") |> 
   stringr::str_flatten()
 
 # Rearrange the final text for a clear summary
@@ -1064,11 +1077,11 @@ set.seed(2904)
 # Make a final fit for both models so we can save it for later use
 last_fit_lr <- 
   last_lr_workflow |> 
-  last_fit(splits)
+  tune::last_fit(splits)
 
 last_fit_rf <- 
   last_rf_workflow |> 
-  last_fit(splits)
+  tune::last_fit(splits)
 
 last_fits <- list(last_fit_lr, last_fit_rf) |> 
   set_names(c("Logistic Regression", "Random Forest"))
@@ -1080,14 +1093,16 @@ if (best_model == "Logistic Regression") {
   last_fit <- last_fit_rf
 }
 
+current_sp <- get_current_sp(cfg$model_settings$sp, cfg$model_settings$sp_form)
+
 # Keep results, model results and associated data
-fittedmodels_outputpath <- get_model_outputpath(mode = "last-fits")
+fittedmodels_outputpath <- get_model_outputpath(mode = "last-fits", current_sp)
 saveRDS(last_fits, file = fittedmodels_outputpath)
 
-modelresults_outputpath <- get_model_outputpath(mode = "modelresults")
+modelresults_outputpath <- get_model_outputpath(mode = "modelresults", current_sp)
 saveRDS(df_model_results, file = modelresults_outputpath)
 
-data_outputpath <- get_model_outputpath(mode = "data")
+data_outputpath <- get_model_outputpath(mode = "data", current_sp)
 saveRDS(df_sp_enrollments, file = data_outputpath)
 
 ```
@@ -1102,7 +1117,7 @@ We evalueren het finale model nu grondiger op basis van 4 metrieken: 1) accuraat
 
 # Collect the metrics
 last_fit |> 
-  collect_metrics() |> 
+  tune::collect_metrics() |> 
   mutate(.estimate = round(.estimate, 4)) |>
   knitr::kable(col.names = c("Metriek", 
                              "Estimator",
@@ -1122,8 +1137,8 @@ Tot slot visualiseren we de prestaties weer met een ROC curve van het beste mode
 
 # Show the roc curve
 auc_lf <- last_fit |> 
-  collect_predictions() |> 
-  roc_curve(Retentie, .pred_FALSE) |> 
+  tune::collect_predictions() |> 
+  yardstick::roc_curve(Retentie, .pred_FALSE) |> 
   mutate(model = "Last fit")
 
 get_roc_plot(auc_lf, position = 3)
@@ -1141,7 +1156,7 @@ get_roc_plot(auc_lf, position = 3)
 
 # Determine model accuracy, average retention rate and base model
 last_fit_accuracy <- last_fit |>
-  collect_metrics() |>
+  tune::collect_metrics() |>
   filter(.metric == "accuracy") |>
   pull(.estimate) |>
   round(4) * 100
@@ -1292,8 +1307,8 @@ knitr::include_graphics(here::here("metadata/images", "basemodel-lift.png"))
 
 # Determine the confusion matrix
 confusion_matrix <- last_fit |>
-  collect_predictions() |>
-  conf_mat(truth = Retentie, estimate = .pred_class) 
+  tune::collect_predictions() |>
+  yardstick::conf_mat(truth = Retentie, estimate = .pred_class) 
 
 df_confusion_matrix <- as_tibble(confusion_matrix$table) |>
   rename(Werkelijkheid = Truth) |>
@@ -1433,7 +1448,7 @@ if (cfg$includes$model_rf) {
 }
 
 # Final Fit
-if (cfg$includes$final_fit) {Ï
+if (cfg$includes$final_fit) {
   rm(
     last_fit
   )

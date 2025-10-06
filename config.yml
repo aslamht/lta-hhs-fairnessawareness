@@ -5,6 +5,7 @@ default:
     institution: "HHs"
     data_provider: "De HHs, IR & Analytics"
     analysis: "De HHs, Lectoraat Learning Technology & Analytics"
+    dataset: "ASI-Syn 20240124"
   
   data_settings:
     pin_board: "HHs/Inschrijvingen"
@@ -16,6 +17,8 @@ default:
     use_synthetic_data: true
     recreate_plots: false
     enrollment_selection: false
+    sp: "CMD"
+    sp_form: "VT"
     
   # Content
   includes:

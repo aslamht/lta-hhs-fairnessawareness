@@ -21,6 +21,8 @@
 library(gtsummary)
 library(flextable)
 
+source("brand/colors/colors.R")
+
 cfg <- config::get()
 
 # . ####
@@ -37,6 +39,8 @@ get_subtitle <- function() {
 
 # Function to determine current study programme
 get_current_sp <- function(sp, sp_form) {
+  
+  df_studyprogrammes = rio::import("R/data/studyprogrammes.rda", trust = TRUE)#,
   
   if (!exists("df_studyprogrammes")) {
     cli::cli_abort("df_studyprogrammes is not defined")
@@ -255,7 +259,7 @@ get_current_sp_output_file <- function(df, mode, group = NULL, analysis = NULL) 
 }
 
 # Function to determine the output path for fitted models
-get_model_outputpath <- function(mode, group = NULL) {
+get_model_outputpath <- function(mode, current_sp, group = NULL) {
   
   # Define the output file
   this_output_file <- get_current_sp_output_file(current_sp, mode, group)
@@ -520,9 +524,9 @@ get_list_select <- function(df, var) {
 get_df_levels <- function() {
   
   df_levels <- rio::import(file.path("R/data", "variables.xlsx"), sheet = "Levels") |>
-    group_by(VAR_Formal_variable) |>
-    arrange(VAR_Level_order, .by_group = TRUE) |>
-    ungroup()
+    dplyr::group_by(VAR_Formal_variable) |>
+    dplyr::arrange(VAR_Level_order, .by_group = TRUE) |>
+    dplyr::ungroup()
   
   df_levels
 }
@@ -608,7 +612,7 @@ sort_levels <- function(levels, df, var) {
 # Function to mutate the levels of a variable
 mutate_levels <- function(df, vars, levels) {
   
-  walk(seq_along(vars), function(i) {
+  purrr::walk(seq_along(vars), function(i) {
     df <- df |>
       mutate(
         !!rlang::sym(vars[i]) := forcats::fct_expand(!!rlang::sym(vars[i]), levels[[i]]),
@@ -1787,7 +1791,7 @@ set_theme <- function(title_font = c("sans"), type = "plot") {
   theme_update(
     
     # Title and caption
-    plot.title = element_textbox_simple(
+    plot.title = ggtext::element_textbox_simple(
       size = 16,
       lineheight = 1,
       color = colors_default["title_color"],
@@ -1796,7 +1800,7 @@ set_theme <- function(title_font = c("sans"), type = "plot") {
       margin = margin(5, 0, 5, 0),
       family = title_font
     ),
-    plot.subtitle = element_textbox_simple(
+    plot.subtitle = ggtext::element_textbox_simple(
       size = 12,
       lineheight = 1,
       color = colors_default["subtitle_color"],
@@ -1805,7 +1809,7 @@ set_theme <- function(title_font = c("sans"), type = "plot") {
     ),
     plot.title.position = "plot",
     plot.caption.position = "plot",
-    plot.caption = element_textbox_simple(size = 8,
+    plot.caption = ggtext::element_textbox_simple(size = 8,
                                           color = colors_default["caption_color"],
                                           padding = margin(0, 0, 0, 0),
                                           margin = margin(15, 0, 0, 0)),
@@ -1836,8 +1840,8 @@ set_theme <- function(title_font = c("sans"), type = "plot") {
                                    color = NA) +
 
       # Make the title of x and y a markdown element
-      theme(axis.title.x = element_markdown(), 
-            axis.title.y = element_markdown()) 
+      theme(axis.title.x = ggtext::element_markdown(), 
+            axis.title.y = ggtext::element_markdown()) 
       
   )
   
@@ -1852,9 +1856,9 @@ add_theme_elements <- function(p,
   if (title_subtitle) {
     p <- p + theme(
       plot.title = element_text(size = 14, face = "bold"),
-      plot.subtitle = element_markdown(),
+      plot.subtitle = ggtext::element_markdown(),
       axis.text.y = element_text(size = 10),
-      plot.caption = element_textbox_simple(
+      plot.caption = ggtext::element_textbox_simple(
         size = 8,
         color = colors_default["caption_color"],
         padding = margin(0, 0, 0, 0),
@@ -1864,7 +1868,7 @@ add_theme_elements <- function(p,
   } else {
     p <- p + theme(
       axis.text.y = element_text(size = 10),
-      plot.caption = element_textbox_simple(
+      plot.caption = ggtext::element_textbox_simple(
         size = 8,
         color = colors_default["caption_color"],
         padding = margin(0, 0, 0, 0),
@@ -1924,13 +1928,13 @@ get_caption <- function() {
   
   caption <- paste0(
     paste(
-      research_settings[["dataset"]],
-      research_settings[["research_path"]],
-      research_settings[["sp"]],
+      cfg$research_settings$dataset,
+      cfg$research_settings$research_path,
+      cfg$model_settings$sp,
       sep = ", "
     ),
     ". \U00A9 ",
-    metadata[["analysis"]],
+    cfg$research_settings$analyses,
     ", ",
     format(Sys.Date(), "%Y")
   )

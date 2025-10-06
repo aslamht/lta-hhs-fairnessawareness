@@ -39,13 +39,6 @@ set_icecream_options <- function() {
 # 2. ADDITIONAL FUNCTIONS ####
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-sort_distinct <- function(df) {
-  if (!is.data.frame(df)) {
-    stop("Input is not a data frame")
-  }
-  
-  dplyr::select(dplyr::distinct(df), base::sort(tidyselect::peek_vars()))
-}
 
 load_datasets <- function(message = FALSE) {
   datasets <- list(

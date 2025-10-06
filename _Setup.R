@@ -13,8 +13,8 @@
 #
 # Datasets: None
 #
-# Remarks
-# 1) None
+# Remarks:
+# 1) None.
 # 2) ___
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -36,11 +36,9 @@ library(glue)
 library(knitr)
 library(markdown)
 
-cfg <- config::get()
-
 # Show the start of the document
 cli_h1("0. ON START")
-
+research_settings <- list()
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 0.1 Restore renv ####
 
@@ -81,6 +79,14 @@ if (!exists("renv_restored") || renv_restored == FALSE) {
 
 cli_h1("Installing packages")
 cli_alert_success("All packages are installed")
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# 0.3 Load Setup config #### 
+
+#source("_Setup_config.R")
+
+cli_h1("Load configuration")
+cli_alert_success("Configuration has been loaded.")
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # 0.4 Set environment profile #### 
@@ -173,6 +179,7 @@ if (setup_executed == FALSE) {
   # 1.7 Load additional features ####
   source("R/functions/report.helpers.R")
 
+  
   cli_h1("Load functions")
   cli_alert_success("Functions are loaded: report")
   
@@ -242,6 +249,10 @@ if (setup_executed == FALSE) {
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 2.4 Succes model ####
   
+  succes_model      <- cfg$model_settings$succes
+  pd                <- cfg$model_settings$sp
+  succes_model_text <- get_succes_model_text(pd, succes_model)
+  
   cli_h1("Succes model settings")
   cli_alert_success("Model settings set")
   
@@ -265,11 +276,11 @@ if (setup_executed == FALSE) {
   # 2.6 Enrollment data  ####
   
   df_sp_enrollments <- rio::import("R/data/syn/studyprogrammes_enrollments_syn.rds", trust = TRUE) |>
-    filter(INS_Faculteit == current_sp$INS_Faculteit,
-           INS_Opleidingsnaam_huidig == current_sp$INS_Opleidingsnaam_huidig,
-           INS_Opleiding == current_sp$INS_Opleiding,
-           INS_Opleidingsvorm == toupper(current_sp$INS_Opleidingsvorm)) |> 
-    mutate(LTA_Dataset = "ASI-Syn 20240124")
+        filter(INS_Faculteit == current_sp$INS_Faculteit,
+               INS_Opleidingsnaam_huidig == current_sp$INS_Opleidingsnaam_huidig,
+               INS_Opleiding == current_sp$INS_Opleiding,
+               INS_Opleidingsvorm == toupper(current_sp$INS_Opleidingsvorm)) |> 
+        mutate(LTA_Dataset = "ASI-Syn 20240124")
   
   cli_h1("Enrollments")
   cli_alert_success("Enrollments loaded")
