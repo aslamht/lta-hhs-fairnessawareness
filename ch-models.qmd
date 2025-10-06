@@ -17,9 +17,6 @@ params:
 ```{r setup}
 #| label: setup
 #| include: false
-source("R/functions/report.helpers.R")
-# Current file
-current_file <- "ch4-models.qmd"
 
 library(dplyr)
 library(purrr)
@@ -27,6 +24,8 @@ library(parsnip)
 library(recipes)
 library(workflows)
 library(ggplot2)
+
+source("R/functions/report.helpers.R")
 
 cfg <- config::get()
 
@@ -36,6 +35,7 @@ df_model_results <- data.frame(
 )
 
 caption <- get_caption()
+
 ```
 
 <!-- HEADER -->
