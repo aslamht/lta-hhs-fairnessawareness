@@ -1,0 +1,18 @@
+default:
+  research_settings:
+    research_path: "Kansengelijkheid"
+    succes_label: "Kans op retentie"
+    institution: "HHs"
+    data_provider: "De HHs, IR & Analytics"
+    analysis: "De HHs, Lectoraat Learning Technology & Analytics"
+  
+  data_settings:
+    pin_board: "HHs/Inschrijvingen"
+  
+  model_settings:
+    succes: "Retentie na 1 jaar"
+    model: "Retentie na 1 jaar"
+    pd: "Nvt"
+    use_synthetic_data: true
+    recreate_plots: false
+    enrollment_selection: false

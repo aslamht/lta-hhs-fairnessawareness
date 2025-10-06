@@ -1,5 +1,6 @@
 library(shiny)
 library(zip)
+source("render_functions.R")
 
 ui <- fluidPage(
   # Custom CSS for centering and styling
@@ -84,14 +85,14 @@ server <- function(input, output, session) {
       cho_path <- if (!is.null(input$cho_file)) input$cho_file$datapath else NULL
       
       # include 
-      execute_params_list <<- list(sp = input$sp, sp_form = input$sp_form)
+      params <- list(sp = input$sp, sp_form = input$sp_form)
       incProgress(0.4)
       
       if (input$report_type == "Basic") {
-        source("render_basic.R")
+        render_basic_report(params)
         out_dir  <- "_basic-report"
       } else {
-        source("render_advanced.R")
+        render_advanced_report(params)
         out_dir  <- "_advanced-report"
       }
       

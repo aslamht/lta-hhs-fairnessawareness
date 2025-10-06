@@ -36,6 +36,8 @@ library(glue)
 library(knitr)
 library(markdown)
 
+cfg <- config::get()
+
 # Show the start of the document
 cli_h1("0. ON START")
 
@@ -247,10 +249,6 @@ if (setup_executed == FALSE) {
   
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 2.4 Succes model ####
-  
-  succes_model      <- params$succes
-  pd                <- params$pd
-  succes_model_text <- get_succes_model_text(pd, succes_model)
   
   cli_h1("Succes model settings")
   cli_alert_success("Model settings set")
