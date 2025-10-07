@@ -1,33 +1,14 @@
----
-subtitle: "Een analyse van kansengelijkheid in studiesucces ({{< meta params.model >}})"
-
-# Format and output
-output-file: "temp.html"
-
-# Parameters
-params:
-  versie: "1.0"
-  succes: "Retentie na 1 jaar"
-  model: "Retentie na 1 jaar"
-  pd: "Nvt"
-  use_synthetic_data: true
-  recreate_plots: false
-  enrollment_selection: false
-  sp: "CMD"
-  sp_form: "VT"
-  
-# Content
-includes:
-  model_rf:       false
----
-
-<!-- Title -->
-
-# Prognosemodel
-
-```{r setup}
-#| label: setup
-#| include: false
+if (!exists("params")) {
+  params <- list()
+  params$succes               <- "Retentie na 1 jaar"
+  params$model                <- "Retentie na 1 jaar"
+  params$pd                   <- "Nvt"
+  params$use_synthetic_data   <- TRUE
+  params$recreate_plots       <- FALSE
+  params$sp                   <- "CMD"
+  params$sp_form              <- "VT"
+  params$enrollment_selection <- FALSE
+}
 
 # Current file
 current_file <- "ch4-models.qmd"
@@ -40,11 +21,8 @@ df_model_results <- data.frame(
   auc = numeric()
 )
 
-include_model_rf <- rmarkdown::metadata$includes$model_rf    # Random Forest
-```
+include_model_rf <- TRUE
 
-```{r}
-#| label: load-data
 
 # Read the data for this study programme
 if (params$use_synthetic_data) {
@@ -107,9 +85,9 @@ if (sp == "HDT") {
     filter(!is.na(RNK_Rangnummer)) 
 } 
 
-```
 
-```{r}
+
+
 #| label: select-inspect-data
 
 list_select <- get_list_select(df_variables, "VAR_Formal_variable")
@@ -146,12 +124,6 @@ df_sp_enrollments <- df_sp_enrollments |>
 df_sp_enrollments <- df_sp_enrollments |> 
   sort_distinct()
 
-```
-
-```{r}
-#| label: tbl-summarizy-missing-after
-#| tbl-cap: "Kwaliteit van de data na bewerkingen (gesorteerd op missende waarden)"
-
 # Edit the data
 df_sp_enrollments <- df_sp_enrollments |> 
   
@@ -176,10 +148,10 @@ df_sp_enrollments <- df_sp_enrollments |>
   # Rearrange the columns so that Retentie is in front
   select(Retentie, everything()) 
 
-```
 
 
-```{r}
+
+
 #| label: split-data
 
 set.seed(0821)
@@ -196,21 +168,12 @@ df_retention_validation <- validation_set(splits)
 
 # Create a resample set based on 10 folds (default)
 df_retention_resamples  <- vfold_cv(df_retention_train, strata = Retentie)
-```
-
-```{r}
-#| label: lr-mod
-#| code-fold: false
 
 # Build the model: logistic regression
 lr_mod <- 
   logistic_reg(penalty = tune(), mixture = 1) |> 
   set_engine("glmnet")
-```
 
-```{r}
-#| label: lr-recipe
-#| code-fold: false
 
 # Build the recipe: logistic regression
 lr_recipe <- 
@@ -223,23 +186,12 @@ lr_recipe <-
   step_zv(all_predictors()) |>                  # Remove zero values
   step_normalize(all_numeric_predictors())      # Center and scale numeric variables
 
-```
-
-```{r}
-#| label: lr-workflow
-#| code-fold: false
 
 # Create the workflow: logistic regression
 lr_workflow <- 
   workflow() |>         # Create a workflow
   add_model(lr_mod) |>  # Add the model
   add_recipe(lr_recipe) # Add the recipe
-
-```
-
-```{r}
-#| label: lr-reg-grid
-#| code-fold: false
 
 # Create a grid: logistic regression
 lr_reg_grid <- tibble(penalty = 10 ^ seq(-4, -1, length.out = 30))
@@ -252,23 +204,13 @@ lr_res <-
             control = control_grid(save_pred = TRUE),
             metrics = metric_set(roc_auc))
 
-```
-
-```{r}
-#| label: lr-best
-#| code-fold: false
-
 # Select the best model: logistic regression
 lr_best <- 
   lr_res |> 
   collect_metrics() |> 
   filter(mean == max(mean)) |>
   slice(1) 
-```
 
-```{r}
-#| label: lr-auc
-#| code-fold: false
 
 # Collect the predictions and evaluate the model (AUC/ROC): logistic regression
 lr_auc <- 
@@ -276,10 +218,6 @@ lr_auc <-
   collect_predictions(parameters = lr_best) |> 
   roc_curve(Retentie, .pred_FALSE) |> 
   mutate(model = "Logistisch Regressie")
-```
-
-```{r}
-#| label: lr-auc-highest
 
 # Determine the AUC of the best model
 lr_auc_highest   <-
@@ -291,15 +229,6 @@ lr_auc_highest   <-
 df_model_results <- 
   df_model_results |>
   add_row(model = "Logistic Regression", auc = lr_auc_highest$.estimate)
-
-```
-
-<!-- MODEL II: Random Forest -->
-
-
-
-```{r}
-#| label: cores
 
 if(include_model_rf == TRUE) {
 
@@ -396,12 +325,7 @@ if(include_model_rf == TRUE) {
   last_fit(splits)
   
 }
-```
 
-<!-- Final Fit -->
-
-```{r}
-#| label: best-model-auc-roc
 
 # Determine which of the models is best based on highest AUC/ROC
 df_model_results <- df_model_results |>
@@ -412,14 +336,7 @@ df_model_results <- df_model_results |>
 # Determine the best model
 best_model     <- df_model_results$model[df_model_results$best == TRUE]
 best_model_auc <- round(df_model_results$auc[df_model_results$best == TRUE], 4)
-```
 
-```{r}
-#| label: last-mod
-#| code-fold: false
-
-# Test the developed model on the test set
-# Determine the optimal parameters
 
 # Build the final models
 last_lr_mod <-
@@ -428,9 +345,6 @@ last_lr_mod <-
   set_engine("glmnet") |>
   set_mode("classification")
 
-```
-
-```{r}
 #| label: last-workflow
 #| code-fold: false
 
@@ -438,12 +352,6 @@ last_lr_mod <-
 last_lr_workflow <- 
   lr_workflow |> 
   update_model(last_lr_mod)
-
-```
-
-```{r}
-#| label: last-fit
-#| code-fold: false
 
 # Perform the final fit
 set.seed(2904)
@@ -453,12 +361,12 @@ last_fit_lr <-
   last_lr_workflow |> 
   last_fit(splits)
 
-last_fits <- list("Logistic Regression" = last_fit_lr) 
+last_fit_rf <- 
+  last_rf_workflow |> 
+  last_fit(splits)
 
-if (include_model_rf == TRUE) {
-  last_fits["Random Forest"] <- last_fit_rf
-}
-
+last_fits <- list(last_fit_lr, last_fit_rf) |> 
+  set_names(c("Logistic Regression", "Random Forest"))
 
 # Determine which model is best
 if (best_model == "Logistic Regression") {
@@ -477,4 +385,4 @@ saveRDS(df_model_results, file = modelresults_outputpath)
 data_outputpath <- get_model_outputpath(mode = "data")
 saveRDS(df_sp_enrollments, file = data_outputpath)
 
-```
+

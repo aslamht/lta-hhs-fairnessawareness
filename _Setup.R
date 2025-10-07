@@ -177,7 +177,7 @@ if (setup_executed == FALSE) {
   
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 1.7 Load additional features ####
-  source("R/functions/report.helpers.R")
+  source("R/functions/report.helpers.basic.R")
 
   cli_h1("Load functions")
   cli_alert_success("Functions are loaded: report")
@@ -389,6 +389,7 @@ if (setup_executed == FALSE) {
     check_data <- FALSE
   }
   
+  check_data <- FALSE
   # If one of these files does not exist and we are not in ch4-models.qmd, 
   # give a cli warning
   if ((

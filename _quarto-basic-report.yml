@@ -24,7 +24,6 @@ book:
       chapters:
         - ch-introduction.qmd
         - ch-equity.qmd
-        - ch-factors.qmd
         - ch-references.qmd
   appendices:
     - x-a-appendix-abbreviations.qmd

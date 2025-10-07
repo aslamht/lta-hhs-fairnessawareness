@@ -34,7 +34,6 @@ includes:
 # Analyse van kansengelijkheid {#sec-kansengelijkheid}
 
 ```{r setup, include = FALSE}
-#| label: setup
 #| echo: false
 
 # Current file

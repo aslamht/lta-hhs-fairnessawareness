@@ -74,7 +74,7 @@ server <- function(input, output, session) {
     withProgress(message = "Rendering report...", value = 0, {
       incProgress(0.1)
       
-      execute_params_list <<- list(sp = input$sp, sp_form = input$sp_form)
+      params <<- list(sp = input$sp, sp_form = input$sp_form)
       incProgress(0.4)
       
       if (input$report_type == "basic") {
