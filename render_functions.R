@@ -12,23 +12,36 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 render_basic_report <- function(params) {
-  withr::with_envvar(new = c("QUARTO_PROFILE" = "basic-report"), {
-    quarto::quarto_render(input    = "ch-models.qmd",
-                          execute_params = params,
-                          as_job   = FALSE)
-    quarto::quarto_render(input = "ch-equity.qmd",
-                          execute_params = params,
-                          as_job = FALSE)
-    
-    quarto::quarto_render(execute_params = params, as_job = FALSE)
-  })
+  quarto::quarto_render(
+    input    = "ch-models.qmd",
+    execute_params = params,
+    as_job   = FALSE,
+    profile = "basic-report"
+  )
+  
+  quarto::quarto_render(
+    input = "ch-equity.qmd",
+    execute_params = params,
+    as_job = FALSE,
+    profile = "basic-report"
+  )
+  
+  quarto::quarto_render(execute_params = params,
+                        as_job = FALSE,
+                        profile = "basic-report")
 }
 
 render_advanced_report <- function(params) {
-  withr::with_envvar(new = c("QUARTO_PROFILE" = "advanced-report"), {
-    quarto::quarto_render(execute_params = params, as_job = FALSE)
-  })
+  quarto::quarto_render(execute_params = params,
+                        as_job = FALSE,
+                        profile = "advanced-report")
 }
 
+if (sys.nframe() == 0){
+  
+  params <- list(sp = "ES-ES", sp_form = "VT")
+  
+  render_basic_report(params)
+  
+}
 
-render_advanced_report(list(sp = "ES-ES", sp_form = "VT"))
