@@ -6,8 +6,9 @@ output-file: "ch-factors.html"
 
 # Parameters
 params:
-  sp: "CMD"
+  sp: "ES-ES"
   sp_form: "VT"
+  recreate_plots: true
 ---
 
 <!-- Title -->
@@ -22,9 +23,10 @@ params:
 library(ggplot2)
 library(dplyr)
 
+source("_Setup.R")
 source("R/functions/report.helpers.R")
 
-current_sp <- get_current_sp(cfg$model_settings$sp, cfg$model_settings$sp_form)
+current_sp <- get_current_sp(params$sp, params$sp_form)
 
 ```
 
@@ -34,7 +36,7 @@ current_sp <- get_current_sp(cfg$model_settings$sp, cfg$model_settings$sp_form)
 
 
 <!-- Studyprogram short -->
-{{< include R/qmd/header-studyprogram.qmd >}}
+{{< include scripts/qmd/header-studyprogram.qmd >}}
 
 <!-- Introduction -->
 
@@ -135,7 +137,7 @@ plot_path <- file.path(get_plot_outputpath(plot_name = "lf_model_parts_rmse",
                                            best_model = best_model))
 
 # If the plot does not exist or if recreate_plots - TRUE, create a new plot
-if (!file.exists(plot_path) || params$recreate_plots == TRUE) {
+if (!file.exists(plot_path) || params$recreate_plots) {
 
   # Calculate the model parts based on the RMSE; remove ID
   mp_rmse <- model_parts(explain_lf, loss_function = loss_root_mean_square) |> 
@@ -187,7 +189,10 @@ We onderzoeken zo de voorspelling van het model per groep en de bijdrage van de 
 #| echo: false
 #| results: asis
 
-df_persona_all <- 
+output <- load_dfpersona(df_sp_enrollments, sensitive_labels)
+df_persona_list <- output$df_persona_list
+df_persona_all <- output$df_persona_all
+
 # Create a breakdown of the most common student across all dates
 breakdown_lf_all <- predict_parts(explainer = explain_lf,
                                   new_observation = df_persona_all[1, ],
@@ -237,7 +242,7 @@ plot_path <- file.path(get_plot_outputpath(plot_name = "lf_break_down_distributi
                                            best_model = best_model))
 
 # If the plot does not exist or if recreate_plots - TRUE, create a new plot
-if (!file.exists(plot_path) || params$recreate_plots == TRUE) {
+if (!file.exists(plot_path) || params$recreate_plots) {
 
   # Define the overall persona and breakdown (with distribution)
   breakdown_lf_all <- predict_parts(explainer = explain_lf,
@@ -432,7 +437,7 @@ plot_path <- file.path(get_plot_outputpath(plot_name = "lf_shapley",
                                            best_model = best_model))
 
 # If the plot does not exist or if recreate_plots - TRUE, create a new plot
-if (!file.exists(plot_path) || params$recreate_plots == TRUE) {
+if (!file.exists(plot_path) || params$recreate_plots) {
 
   # Determine the Shapley values
   lf_shapley <- 
@@ -639,7 +644,8 @@ for (group in c("Alle studenten", sensitive_labels)) {
     # Save the plot
     suppressWarnings(finalize_plot(
       plot_name = pdp_plot,
-      save_filepath = plot_path
+      save_filepath = plot_path,
+      height_pixels = 
     ))
 
     # Print the existing plot
@@ -667,13 +673,13 @@ for (group in c("Alle studenten", sensitive_labels)) {
 <!-- Justification -->
 
 ::: {.content-hidden unless-meta="includes.justification"}
-{{< include R/qmd/footer-justification.qmd >}}
+{{< include scripts/qmd/footer-justification.qmd >}}
 :::
 
 <!-- Copyright -->
 
 ::: {.content-hidden unless-meta="includes.copyright"}
-{{< include R/qmd/footer-copyright.qmd >}}
+{{< include scripts/qmd/footer-copyright.qmd >}}
 :::
 
 

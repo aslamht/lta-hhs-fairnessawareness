@@ -6,7 +6,7 @@ output-file: "ch-models.html"
 
 # Parameters
 params:
-  sp: "CMD"
+  sp: "ES-ES"
   sp_form: "VT"
 ---
 
@@ -27,15 +27,15 @@ library(ggplot2)
 
 source("R/functions/report.helpers.R")
 
-cfg <- config::get()
+current_sp <- get_current_sp(params$sp, params$sp_form)
+caption <- get_caption(current_sp)
+
+source("_Setup.R")
 
 df_model_results <- data.frame(
   model = character(),
   auc = numeric()
 )
-
-current_sp <- get_current_sp(cfg$model_settings$sp, cfg$model_settings$sp_form)
-caption <- get_caption(current_sp)
 
 
 ```
@@ -43,7 +43,7 @@ caption <- get_caption(current_sp)
 <!-- HEADER -->
 
 <!-- Studyprogram short -->
-{{< include R/qmd/header-studyprogram.qmd >}}
+{{< include scripts/qmd/header-studyprogram.qmd >}}
 
 <!-- Methods -->
 
@@ -97,7 +97,6 @@ We laden een subset in van historische data specifiek voor:
 ```{r}
 #| label: load-data
 
-df_variables   <- get_df_variables()
 df_levels      <- get_df_levels()
 levels_formal  <- get_levels(df_levels, formal = TRUE)
 sensitive_formal_variables <- get_list_sensitive(df_variables, var = "VAR_Formal_variable")
@@ -1095,7 +1094,7 @@ if (best_model == "Logistic Regression") {
   last_fit <- last_fit_rf
 }
 
-current_sp <- get_current_sp(cfg$model_settings$sp, cfg$model_settings$sp_form)
+current_sp <- get_current_sp(params$sp, params$sp_form)
 
 # Keep results, model results and associated data
 fittedmodels_outputpath <- get_model_outputpath(mode = "last-fits", current_sp)
@@ -1387,13 +1386,13 @@ Ongeacht de mate van accuraatheid, is het voor onderzoek naar kansengelijkheid e
 <!-- Justification -->
 
 ::: {.content-hidden unless-meta="includes.justification"}
-{{< include R/qmd/footer-justification.qmd >}}
+{{< include scripts/qmd/footer-justification.qmd >}}
 :::
 
 <!-- Copyright -->
 
 ::: {.content-hidden unless-meta="includes.copyright"}
-{{< include R/qmd/footer-copyright.qmd >}}
+{{< include scripts/qmd/footer-copyright.qmd >}}
 :::
 
 <!-- Cleaning up -->

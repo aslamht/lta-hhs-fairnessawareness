@@ -1704,7 +1704,7 @@ add_theme_elements <- function(p,
   if (title_subtitle) {
     p <- p + theme(
       plot.title = element_text(size = 14, face = "bold"),
-      plot.subtitle = ggtext::element_markdown(),
+      #plot.subtitle = ggtext::element_markdown(),
       axis.text.y = element_text(size = 10),
       plot.caption = ggtext::element_textbox_simple(
         size = 8,
@@ -2474,6 +2474,7 @@ finalize_plot <- function(plot_name,
     nrow = 2,
     heights = c(1, 0 / (height_pixels / 450))
   )
+  
   save_plot(plot_grid, width_pixels, height_pixels, save_filepath)
   
   # If the plot must be shown, show it

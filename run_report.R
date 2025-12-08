@@ -47,13 +47,9 @@ ui <- fluidPage(
       h2("No Fairness without Awareness"),
       
       selectInput("report_type", "Report type", c("Basic", "Advanced")),
-      selectInput("sp", "Studyprogram", c("CMD", "VD")),
-      selectInput("sp_form", "Studyprogram Form", c("VT")),
+      selectInput("sp", "Studyprogram", c("CMD", "VD", "BO", "ES-ES")),
+      selectInput("sp_form", "Studyprogram Form", c("VT", "DT", "DU")),
       fileInput("cho_file", "Upload 1CHO data",
-                accept = c(".csv", ".xlsx", ".xls", ".txt")),
-      fileInput("seswoa_file", "Upload SESWOA data",
-                accept = c(".csv", ".xlsx", ".xls", ".txt")),
-      fileInput("apcg_file", "Upload APCG data",
                 accept = c(".csv", ".xlsx", ".xls", ".txt")),
       
       actionButton("go", "Generate report", class = "btn btn-primary"),

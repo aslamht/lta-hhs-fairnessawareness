@@ -29,3 +29,6 @@ render_advanced_report <- function(params) {
     quarto::quarto_render(execute_params = params, as_job = FALSE)
   })
 }
+
+
+render_advanced_report(list(sp = "ES-ES", sp_form = "VT"))

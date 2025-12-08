@@ -4,6 +4,11 @@ subtitle: "Een analyse van kansengelijkheid in studiesucces (Retentie na 1 jaar)
 # Format and output
 output-file: "ch-equity.html"
 
+# Parameters
+params:
+  sp: "ES-ES"
+  sp_form: "VT"
+
 ---
 
 <!-- Title -->
@@ -17,10 +22,11 @@ output-file: "ch-equity.html"
 library(ggplot2)
 library(tidyr)
 
-cfg <- config::get()
 source("R/functions/report.helpers.R")
 
-current_sp <- get_current_sp(cfg$model_settings$sp, cfg$model_settings$sp_form)
+source("_Setup.R")
+
+current_sp <- get_current_sp(params$sp, params$sp_form)
 
 df_levels <- get_df_levels()
 levels <- get_levels(df_levels)
@@ -39,7 +45,7 @@ df_sp_enrollments <- rio::import(data_outputpath, trust = TRUE) |>
 <!-- HEADER -->
 
 <!-- Studyprogram short -->
-{{< include R/qmd/header-studyprogram.qmd >}}
+{{< include scripts/qmd/header-studyprogram.qmd >}}
 
 <!-- Introduction -->
 
@@ -116,7 +122,7 @@ De volgende **definities** zijn van belang:
 
 <!-- Explanation of confusion matrix -->
 ::: {.content-visible when-profile="advanced-report"}
-{{< include R/qmd/advanced/confusion-matrix-tabset.qmd >}}
+{{< include scripts/qmd/advanced/confusion-matrix-tabset.qmd >}}
 :::
 
 <!-- Numbers and percentages by group -->
@@ -195,7 +201,7 @@ for (group in c(sensitive_labels)) {
   
   # Create a plot of the fairness analysis
   density_plot <- suppressWarnings(
-    get_density_plot(fairness_object, group = group) 
+    get_density_plot(fairness_object, group = group, current_sp = current_sp) 
   ) 
 
   # Save the plot
@@ -243,7 +249,7 @@ Om de robuustheid en betrouwbaarheid in de detectie van bias te waarborgen, moet
 
 <!-- Reasons for the use of two metrics to confirm bias -->
 ::: {.content-visible when-profile="advanced-report"}
-{{< include R/qmd/advanced/bias-metrics-reasons.qmd >}}
+{{< include scripts/qmd/advanced/bias-metrics-reasons.qmd >}}
 :::
 
 ```{r}
@@ -309,20 +315,20 @@ for (group in c(sensitive_labels)) {
 <!-- Equity conclusions -->
 ## Conclusies
 
-{{< include R/qmd/equity-conclusions.qmd >}}
+{{< include scripts/qmd/equity-conclusions.qmd >}}
 
 <!-- FOOTER -->
 
 <!-- Justification -->
 
 ::: {.content-hidden unless-meta="includes.justification"}
-{{< include R/qmd/footer-justification.qmd >}}
+{{< include scripts/qmd/footer-justification.qmd >}}
 :::
 
 <!-- Copyright -->
 
 ::: {.content-hidden unless-meta="includes.copyright"}
-{{< include R/qmd/footer-copyright.qmd >}}
+{{< include scripts/qmd/footer-copyright.qmd >}}
 :::
 
 <!-- Cleaning up -->

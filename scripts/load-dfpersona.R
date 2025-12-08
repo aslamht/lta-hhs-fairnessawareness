@@ -170,6 +170,6 @@ load_dfpersona <- function(df_sp_enrollments, sensitive_labels) {
   ## Load the personas
   df_persona_all <- get_df_persona_recursive(df_sp_enrollments)
   
-  return(df_persona_all)
+  return(list(df_persona_all = df_persona_all, df_persona_list = df_persona_list))
 }
 

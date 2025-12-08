@@ -4,6 +4,11 @@ subtitle: "Een analyse van kansengelijkheid in studiesucces (Retentie na 1 jaar)
 # Format and output
 output-file: "ch-introduction.html"
 
+# Parameters
+params:
+  sp: "CMD"
+  sp_form: "VT"
+
 ---
 
 <!-- Title -->
@@ -15,6 +20,7 @@ output-file: "ch-introduction.html"
 #| echo: false
 #| include: false
 
+source("_Setup.R")
 
 ```
 
@@ -23,7 +29,7 @@ output-file: "ch-introduction.html"
 <!-- HEADER -->
 
 <!-- Studyprogram -->
-{{< include R/qmd/header-studyprogram.qmd >}}
+{{< include scripts/qmd/header-studyprogram.qmd >}}
 
 <!-- BODY -->
 
@@ -73,7 +79,7 @@ Deze analyse kent drie hoofdstukken:
 <!-- Contact -->
 
 ::: {.content-hidden unless-meta="includes.contact"}
-{{< include R/qmd/footer-contact.qmd >}}
+{{< include scripts/qmd/footer-contact.qmd >}}
 :::
 
 <!-- FOOTER -->
@@ -81,13 +87,13 @@ Deze analyse kent drie hoofdstukken:
 <!-- Justification -->
 
 ::: {.content-hidden unless-meta="includes.justification"}
-{{< include R/qmd/footer-justification.qmd >}}
+{{< include scripts/qmd/footer-justification.qmd >}}
 :::
 
 <!-- Copyright -->
 
 ::: {.content-hidden unless-meta="includes.copyright"}
-{{< include R/qmd/footer-copyright.qmd >}}
+{{< include scripts/qmd/footer-copyright.qmd >}}
 :::
 
 <!-- Cleaning up -->

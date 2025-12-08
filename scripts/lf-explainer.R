@@ -3,7 +3,7 @@ library(DALEXtra)
 # Select the best model
 source("R/functions/report.helpers.R")
 
-current_sp <- get_current_sp(cfg$model_settings$sp, cfg$model_settings$sp_form)
+current_sp <- get_current_sp(params$sp, params$sp_form)
 
 # Load last_fits
 fittedmodels_outputpath <- get_model_outputpath(mode = "last-fits", current_sp)

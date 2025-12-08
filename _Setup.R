@@ -296,7 +296,8 @@ if (setup_executed == FALSE) {
   }
   
   research_settings[["dataset"]] <- get_dataset(df_sp_enrollments)
-  research_settings[["sp"]]      <- get_sp()
+  current_sp <- get_current_sp(params$sp, params$sp_form)
+  research_settings[["sp"]]      <- get_sp(current_sp)
   
   cli_h1("Metadata & research settings")
   cli_alert_success("Metadata & research settings loaded")
@@ -307,7 +308,7 @@ if (setup_executed == FALSE) {
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 2.8.1 Caption
   
-  caption <- get_caption()
+  caption <- get_caption(current_sp)
   
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   # 2.8.2 Plot height and width ####
@@ -362,9 +363,9 @@ if (setup_executed == FALSE) {
   # 3.4 Paths for data, last fits and model results ####
   
   # Define the paths
-  data_outputpath            <- get_model_outputpath(mode = "data")
-  fittedmodels_outputpath    <- get_model_outputpath(mode = "last-fits")
-  modelresults_outputpath    <- get_model_outputpath(mode = "modelresults")
+  data_outputpath            <- get_model_outputpath(mode = "data", current_sp = current_sp)
+  fittedmodels_outputpath    <- get_model_outputpath(mode = "last-fits", current_sp = current_sp)
+  modelresults_outputpath    <- get_model_outputpath(mode = "modelresults", current_sp = current_sp)
   
   # If these folders don't exist yet, create them
   for (i in c(data_outputpath, 
@@ -430,4 +431,8 @@ if (setup_executed == FALSE) {
     
     
   } 
-}
+  
+  setup_executed <- TRUE
+  
+} 
+

@@ -1,7 +1,7 @@
 # Select the best model
 source("R/functions/report.helpers.R")
 
-current_sp <- get_current_sp(cfg$model_settings$sp, cfg$model_settings$sp_form)
+current_sp <- get_current_sp(params$sp, params$sp_form)
 
 determin_fitted_model <- function(current_sp) {
   # Load last_fits
@@ -30,6 +30,8 @@ determin_fitted_model <- function(current_sp) {
     }
     
   }
+  
+  return(fitted_model)
 }
 
 

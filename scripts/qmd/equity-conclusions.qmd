@@ -1,13 +1,13 @@
 ```{r}
 #| label: df-txt-fairness-conclusions
 #| results: asis
-#| eval: !expr 'file.exists(get_model_outputpath(mode = "modelresults"))'
+#| eval: !expr 'file.exists(get_model_outputpath(mode = "modelresults", current_sp = current_sp))'
 
 df_fairness_list <- list()
 
 # Walk over the variables
 for (i in c(sensitive_labels)) {
-  fairness_output_path       <- get_model_outputpath(mode = "fairness", group = i)
+  fairness_output_path       <- get_model_outputpath(mode = "fairness", group = i, current_sp = current_sp)
   df_fairness_list[[i]]      <- readRDS(fairness_output_path) |>
     mutate(FRN_Bias = case_when(FRN_Score < 0.8 ~ "Negatieve Bias",
                                 FRN_Score > 1.25 ~ "Positieve Bias",
@@ -26,7 +26,7 @@ De uitkomsten van de kansengelijkheidanalysis is:
 ```{r}
 #| label: txt-fairness-conclusions
 #| results: asis
-#| eval: !expr 'file.exists(get_model_outputpath(mode = "modelresults"))'
+#| eval: !expr 'file.exists(get_model_outputpath(mode = "modelresults", current_sp = current_sp))'
 
 # Now create a text per variable from the table
 conclusions_list <- list()
@@ -49,7 +49,7 @@ for (i in sensitive_labels) {
 #| label: tbl-fairness-conclusions
 #| tbl-cap: "Fairness conclusies per groep"
 #| results: asis
-#| eval: !expr 'file.exists(get_model_outputpath(mode = "modelresults"))'
+#| eval: !expr 'file.exists(get_model_outputpath(mode = "modelresults", current_sp = current_sp))'
 
 # Create a flextable
 ft_fairness <- get_ft_fairness(flextable(df_fairness_wide |>

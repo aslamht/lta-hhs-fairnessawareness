@@ -3,7 +3,7 @@ subtitle: "Een analyse van kansengelijkheid in studiesucces (Retentie na 1 jaar)
 
 # Parameters
 params:
-  sp: "CMD"
+  sp: "ES-ES"
   sp_form: "VT"
   
 ---
@@ -28,7 +28,7 @@ source("_Setup.R")
 
 <!-- Studyprogram -->
 ::: {.content-visible unless-profile="advanced-report"}
-{{< include R/qmd/header-studyprogram.qmd >}}
+{{< include scripts/qmd/header-studyprogram.qmd >}}
 :::
 
 <!-- BODY -->
@@ -36,7 +36,7 @@ source("_Setup.R")
 <!-- Equity conclusions -->
 ::: {.content-visible unless-profile="advanced-report"}
 ## Samenvatting analyse kansengelijkheid
-{{< include R/qmd/equity-conclusions.qmd >}}
+{{< include scripts/qmd/equity-conclusions.qmd >}}
 
 Zie voor een verdere onderbouwing van deze uitkomsten de volgende hoofdstukken.
 :::
@@ -51,11 +51,11 @@ In dit profiel worden alle modellen ontwikkeld en afbeeldingen gebouwd.
 <!-- Contact -->
 
 ::: {.content-hidden unless-meta="includes.contact"}
-{{< include R/qmd/footer-contact.qmd >}}
+{{< include scripts/qmd/footer-contact.qmd >}}
 :::
 
 <!-- Copyright -->
 
 ::: {.content-hidden unless-meta="includes.copyright"}
-{{< include R/qmd/footer-copyright.qmd >}}
+{{< include scripts/qmd/footer-copyright.qmd >}}
 :::
