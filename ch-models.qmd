@@ -399,7 +399,7 @@ knitr::include_graphics(here::here("metadata/images", "prognosemodel-dataset-lta
 ```{r}
 #| label: split-data
 
-set.seed(0821)
+set.seed(0)
 
 # Split the data into 3 parts: 60%, 20% and 20%
 splits      <- rsample::initial_validation_split(df_sp_enrollments,
@@ -813,7 +813,7 @@ rf_mod
 extract_parameter_set_dials(rf_mod)
 
 # Determine the seed
-set.seed(2904)
+set.seed(10)
 
 # Build the grid: random forest
 rf_res <- 
@@ -1073,7 +1073,7 @@ We voeren de finale fit uit. De functie `last_fit` past het model toe op de vali
 #| code-fold: false
 
 # Perform the final fit
-set.seed(2904)
+set.seed(10)
 
 # Make a final fit for both models so we can save it for later use
 last_fit_lr <- 
